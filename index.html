@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 4.8</title>
+<title>Editorium 4.9</title>
 <style>
   :root{
     --editor-font-size:14px;
@@ -178,19 +178,33 @@
   .submenuwrap.disabled > .mi{color:var(--fg-muted);cursor:default;}
   .submenuwrap.disabled > .mi:hover{background:transparent;color:var(--fg-muted);}
 
-  /* ---------- Barra de formato Markdown ---------- */
-  .mdtoolbar{
-    display:none;align-items:center;gap:4px;padding:5px 8px;
-    background:var(--bg-toolbar);border-bottom:1px solid var(--border);flex-shrink:0;
+  /* ---------- Panel de todas mis notas ---------- */
+  .panelToggle{
+    background:transparent;border:none;color:var(--fg-text);cursor:pointer;
+    padding:16px 14px;font-size:.82rem;
   }
-  .mdtoolbar.show{display:flex;}
-  .mdtoolbar select, .mdtoolbar button{
-    background:transparent;border:1px solid transparent;color:var(--fg-text);
-    padding:5px 8px;border-radius:0;font-size:.82rem;cursor:pointer;
+  .panelToggle:hover{background:var(--border);}
+  .panelToggle.active{color:var(--accent);}
+  .notesPanel{
+    width:0;overflow:hidden;flex-shrink:0;
+    background:var(--bg-toolbar);border-right:1px solid var(--border);
   }
-  .mdtoolbar select{border:1px solid var(--border);}
-  .mdtoolbar button:hover{background:var(--border);}
-  .mdtoolbar .mdsep{width:1px;background:var(--border);align-self:stretch;margin:2px 4px;}
+  .notesPanel.open{width:220px;}
+  .notesPanel-inner{width:220px;height:100%;overflow-y:auto;padding:10px;}
+  .notesPanel h4{
+    font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-muted);
+    margin:2px 0 8px;padding:0 4px;
+  }
+  .notesPanel-item{
+    padding:6px 8px;font-size:.8rem;cursor:pointer;color:var(--fg-text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .notesPanel-item:hover{background:var(--border);}
+  .notesPanel-empty{color:var(--fg-muted);font-size:.76rem;padding:4px;line-height:1.6;}
+  .notesPanel-empty button{
+    margin-top:8px;background:var(--accent);color:var(--bg-main);border:none;
+    padding:6px 10px;font-size:.76rem;cursor:pointer;width:100%;
+  }
 
   /* ---------- Área de edición (columna fija de 110 caracteres) ---------- */
   .workspace{flex:1;display:flex;min-height:0;}
@@ -309,13 +323,12 @@
   <button class="tabAdd hidden" id="dummy" style="display:none"></button>
 
   <nav class="menubar">
+    <button class="panelToggle" id="panelToggleBtn" title="Mostrar/ocultar panel de notas">☰</button>
     <div class="menu" data-menu="file">
       <button class="menu-btn">Archivo</button>
       <div class="menu-dropdown">
         <button class="mi" data-action="newTab">Nueva pestaña<span class="kbd">Ctrl+N</span></button>
         <button class="mi" data-action="newWindow">Nueva ventana<span class="kbd">Ctrl+Shift+N</span></button>
-        <button class="mi" data-action="newMarkdown">Nueva pestaña Markdown</button>
-        <button class="mi" data-action="newTemplate">Nueva desde plantilla…</button>
         <div class="mi-sep"></div>
         <button class="mi" data-action="open">Abrir<span class="kbd">Ctrl+O</span></button>
         <div class="submenuwrap" id="recentWrap">
@@ -345,8 +358,6 @@
         <button class="mi" data-action="paste">Pegar<span class="kbd">Ctrl+V</span></button>
         <button class="mi" data-action="delete">Eliminar<span class="kbd">Supr</span></button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="clearFormat">Borrar formato</button>
-        <div class="mi-sep"></div>
         <button class="mi" data-action="find">Buscar<span class="kbd">Ctrl+F</span></button>
         <button class="mi" data-action="findNext">Buscar siguiente<span class="kbd">F3</span></button>
         <button class="mi" data-action="findPrev">Buscar anterior<span class="kbd">Shift+F3</span></button>
@@ -372,27 +383,13 @@
     <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)">Guardar</button>
   </nav>
 
-  <div class="mdtoolbar" id="mdToolbar">
-    <select id="headingSelect" title="Encabezado">
-      <option value="">Párrafo</option>
-      <option value="1">H1</option>
-      <option value="2">H2</option>
-      <option value="3">H3</option>
-    </select>
-    <span class="mdsep"></span>
-    <button type="button" id="mdList" title="Lista">≡ Lista</button>
-    <span class="mdsep"></span>
-    <button type="button" id="mdBold" title="Negrita"><b>B</b></button>
-    <button type="button" id="mdItalic" title="Cursiva"><i>I</i></button>
-    <button type="button" id="mdStrike" title="Tachado"><s>S</s></button>
-    <span class="mdsep"></span>
-    <button type="button" id="mdLink" title="Enlace">🔗</button>
-    <button type="button" id="mdTable" title="Tabla">⊞</button>
-    <span class="mdsep"></span>
-    <button type="button" id="mdClear" title="Borrar formato">Aɓ̶</button>
-  </div>
-
   <main class="workspace">
+    <aside class="notesPanel" id="notesPanel">
+      <div class="notesPanel-inner">
+        <h4>Mis notas</h4>
+        <div id="notesPanelList"></div>
+      </div>
+    </aside>
     <div class="editorstack" id="editorstack"></div>
   </main>
 
@@ -424,7 +421,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V4.8.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V4.9.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -448,13 +445,14 @@
   const statusWords = document.getElementById('statusWords');
   const statusChars = document.getElementById('statusChars');
   const statusScheme = document.getElementById('statusScheme');
-  const mdToolbar = document.getElementById('mdToolbar');
+  const notesPanel = document.getElementById('notesPanel');
+  const notesPanelList = document.getElementById('notesPanelList');
+  const panelToggleBtn = document.getElementById('panelToggleBtn');
   const recentSubmenu = document.getElementById('recentSubmenu');
   const fontMenuDropdown = document.getElementById('fontMenuDropdown');
   const schemeMenuDropdown = document.getElementById('schemeMenuDropdown');
   const modalOverlay = document.getElementById('modalOverlay');
   const modalBox = document.getElementById('modalBox');
-  const headingSelect = document.getElementById('headingSelect');
   const quickSaveBtn = document.getElementById('quickSaveBtn');
   const toastEl = document.getElementById('toast');
   const reconnectBar = document.getElementById('reconnectBar');
@@ -468,7 +466,7 @@
     ['nord','Nord'], ['gruvbox','Gruvbox Dark'], ['github-light','GitHub Light']
   ];
 
-  let tabs = [];        // {id, name, handle, isMarkdown, ta, originalContent}
+  let tabs = [];        // {id, name, handle, ta, originalContent}
   let activeTabId = null;
   let tabCounter = 0;
   let recentFiles = []; // {name, handle}  (solo en memoria de la sesión)
@@ -562,6 +560,7 @@
       showToast('Carpeta "' + handle.name + '" configurada ✓');
       syncFolderStatus();
       syncLocationWarning();
+      if(notesPanelOpen) refreshNotesPanel();
     }catch(e){ /* el usuario canceló el selector */ }
   }
 
@@ -592,10 +591,63 @@
         showToast('Carpeta "' + saveDirHandle.name + '" reconectada ✓');
         syncFolderStatus();
         syncLocationWarning();
+        if(notesPanelOpen) refreshNotesPanel();
       }
     }catch(e){ /* el usuario negó el permiso */ }
   });
   reconnectDismiss.addEventListener('click', () => reconnectBar.classList.remove('show'));
+
+  // ============ Panel de todas mis notas ============
+  let notesPanelOpen = false;
+
+  function toggleNotesPanel(){
+    notesPanelOpen = !notesPanelOpen;
+    notesPanel.classList.toggle('open', notesPanelOpen);
+    panelToggleBtn.classList.toggle('active', notesPanelOpen);
+    if(notesPanelOpen) refreshNotesPanel();
+  }
+  panelToggleBtn.addEventListener('click', toggleNotesPanel);
+
+  async function refreshNotesPanel(){
+    if(!saveDirHandle){
+      notesPanelList.innerHTML =
+        '<div class="notesPanel-empty">Configura una carpeta de guardado para ver aquí todas tus notas.' +
+        '<button type="button" id="notesPanelConfigBtn">Elegir carpeta…</button></div>';
+      const btn = document.getElementById('notesPanelConfigBtn');
+      if(btn) btn.addEventListener('click', chooseSaveFolder);
+      return;
+    }
+    notesPanelList.innerHTML = '<div class="notesPanel-empty">Cargando…</div>';
+    const items = [];
+    try{
+      for await (const [name, handle] of saveDirHandle.entries()){
+        if(handle.kind !== 'file' || !/\.(txt|md|markdown)$/i.test(name)) continue;
+        items.push({ name, handle });
+      }
+    }catch(e){ /* la carpeta pudo cambiar de permisos */ }
+    items.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    if(items.length === 0){
+      notesPanelList.innerHTML = '<div class="notesPanel-empty">Esta carpeta todavía no tiene notas guardadas.</div>';
+      return;
+    }
+    notesPanelList.innerHTML = '';
+    items.forEach(function(item){
+      const row = document.createElement('div');
+      row.className = 'notesPanel-item';
+      row.textContent = item.name;
+      row.title = item.name;
+      row.addEventListener('click', async function(){
+        const existing = tabs.find(t => t.name === item.name && t.handle);
+        if(existing){ activateTab(existing.id); return; }
+        try{
+          const file = await item.handle.getFile();
+          const text = await file.text();
+          createTab({ name: item.name, content: text, handle: item.handle });
+        }catch(e){ alert('No se pudo abrir el archivo.'); }
+      });
+      notesPanelList.appendChild(row);
+    });
+  }
 
   // ============ Buscar en todas las notas (carpeta fija) ============
   function searchAllNotes(){
@@ -661,7 +713,7 @@
         try{
           const file = await m.handle.getFile();
           const text = await file.text();
-          createTab({ name: m.name, content: text, handle: m.handle, isMarkdown: /\.(md|markdown)$/i.test(m.name) });
+          createTab({ name: m.name, content: text, handle: m.handle });
         }catch(e){ alert('No se pudo abrir el archivo.'); }
         closeModal();
       });
@@ -724,7 +776,7 @@
 
     const tab = {
       id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
-      isMarkdown: !!opts.isMarkdown, ta, originalContent: opts.content || '', pinned: false
+      ta, originalContent: opts.content || '', pinned: false
     };
     tabs.push(tab);
     attachEditorEvents(ta);
@@ -738,7 +790,6 @@
     tabs.forEach(t => t.ta.classList.toggle('active', t.id === id));
     buildTabsBar();
     refreshAll();
-    syncMdToolbarDisplay();
     syncLocationWarning();
     activeTextarea() && activeTextarea().focus();
   }
@@ -779,73 +830,12 @@
           return false;
         }
         if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.txt';
-        createTab({ name, isMarkdown: /\.(md|markdown)$/i.test(name) });
-      }
-    );
-  }
-  function newMarkdownTab(){
-    openModal(
-      '<h3>Nueva pestaña Markdown</h3><label>Nombre del archivo</label>' +
-      '<input type="text" id="newNameInput" placeholder="ej: borrador-ensayo.md">' +
-      '<div class="modal-error" id="newNameError"></div>' +
-      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
-      function(){
-        let name = document.getElementById('newNameInput').value.trim();
-        if(isGenericName(name)){
-          document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
-          return false;
-        }
-        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.md';
-        createTab({ name, isMarkdown: true });
+        createTab({ name });
       }
     );
   }
   function newWindow(){ window.open(location.href, '_blank'); }
 
-  // ============ Plantillas ============
-  const TEMPLATES = {
-    smartpost:
-      '# [Título del SmartPost]\n\n**Fecha:** \n**Fuentes:** \n\n' +
-      '## TL;DR\n\n\n## Qué pasó\n\n\n## Por qué importa\n\n\n## Dato o argumento clave\n\n\n' +
-      '## Contexto\n\n\n## The Big Picture\n\n\n## Between the Lines\n\n\n' +
-      '## Verificación del contenido\n\n\n## Actores involucrados\n\n\n' +
-      '## Narrativas en competencia\n\n\n## Riesgos y escenarios\n\n\n' +
-      '## Reality Check\n\n\n## Qué sigue\n\n\n## Bottom Line\n\n',
-    balada:
-      '# [Título de la canción]\n\n## Preludio\n\n\n## Estrofa 1\n\n\n## Estribillo\n\n\n' +
-      '## Estrofa 2\n\n\n## Puente\n\n\n## Estribillo (final)\n\n\n## Coda\n\n',
-    articulo:
-      '# [Título]\n\n## Introducción\n\n\n## Desarrollo\n\n\n## Conclusión\n\n'
-  };
-  const TEMPLATE_LABELS = {
-    smartpost: 'SmartPost (14 secciones)',
-    balada: 'Balada (Preludio–Coda)',
-    articulo: 'Artículo / Markdown básico'
-  };
-
-  function newFromTemplate(){
-    const options = Object.keys(TEMPLATES).map(k =>
-      '<option value="' + k + '">' + TEMPLATE_LABELS[k] + '</option>'
-    ).join('');
-    openModal(
-      '<h3>Nueva desde plantilla</h3>' +
-      '<label>Plantilla</label><select id="templateSelect">' + options + '</select>' +
-      '<label>Nombre del archivo</label>' +
-      '<input type="text" id="newNameInput" placeholder="ej: smartpost-borrador-junio.md">' +
-      '<div class="modal-error" id="newNameError"></div>' +
-      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
-      function(){
-        let name = document.getElementById('newNameInput').value.trim();
-        if(isGenericName(name)){
-          document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
-          return false;
-        }
-        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.md';
-        const key = document.getElementById('templateSelect').value;
-        createTab({ name, content: TEMPLATES[key], isMarkdown: true });
-      }
-    );
-  }
 
   // ============ refresco de UI del editor ============
   function attachEditorEvents(ta){
@@ -896,8 +886,7 @@
         });
         const file = await handle.getFile();
         const text = await file.text();
-        const isMd = /\.(md|markdown)$/i.test(file.name);
-        createTab({ name: file.name, content: text, handle, isMarkdown: isMd });
+        createTab({ name: file.name, content: text, handle });
         addRecent(file.name, handle);
       }catch(err){ /* cancelado */ }
     } else {
@@ -907,8 +896,7 @@
   fileInput.addEventListener('change', async function(){
     const file = fileInput.files[0]; if(!file) return;
     const text = await file.text();
-    const isMd = /\.(md|markdown)$/i.test(file.name);
-    createTab({ name: file.name, content: text, isMarkdown: isMd });
+    createTab({ name: file.name, content: text });
     fileInput.value = '';
   });
 
@@ -967,9 +955,8 @@
           document.getElementById('forceNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
           return false;
         }
-        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += /\.(md|markdown)$/i.test(tab.name) ? '.md' : '.txt';
+        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.txt';
         tab.name = name;
-        tab.isMarkdown = /\.(md|markdown)$/i.test(name);
         if(saveDirHandle){ saveIntoFolder(tab, name); }
         else { promptSaveAs(tab); }
       }
@@ -992,7 +979,7 @@
             document.getElementById('saveAsNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
             return false;
           }
-          if(!/\.[a-zA-Z0-9]+$/.test(newName)) newName += /\.(md|markdown)$/i.test(tab.name) ? '.md' : '.txt';
+          if(!/\.[a-zA-Z0-9]+$/.test(newName)) newName += '.txt';
           saveIntoFolder(tab, newName);
         }
       );
@@ -1044,16 +1031,16 @@
       await writable.close();
       tab.handle = handle;
       tab.name = finalName;
-      tab.isMarkdown = /\.(md|markdown)$/i.test(finalName);
       tab.originalContent = tab.ta.value;
       addRecent(tab.name, handle);
-      refreshAll(); syncMdToolbarDisplay();
+      refreshAll();
       if(finalName !== name){
         showToast('Ya existía "' + name + '" — guardado como "' + finalName + '" ✓');
       } else {
         showToast('Guardado ✓');
       }
       syncLocationWarning();
+      if(notesPanelOpen) refreshNotesPanel();
     }catch(err){
       showToast('Error al guardar');
       alert('No se pudo guardar en la carpeta configurada: ' + err.message);
@@ -1079,10 +1066,9 @@
         tab.handle = handle;
         const file = await handle.getFile();
         tab.name = file.name;
-        tab.isMarkdown = /\.(md|markdown)$/i.test(file.name);
         tab.originalContent = tab.ta.value;
         addRecent(tab.name, handle);
-        refreshAll(); syncMdToolbarDisplay();
+        refreshAll();
         showToast('Guardado ✓');
         syncLocationWarning();
       }catch(err){ /* cancelado */ }
@@ -1139,17 +1125,6 @@
     ta.setRangeText('', start, end, 'end'); refreshAll();
   }
   function doUndo(){ document.execCommand('undo'); refreshAll(); }
-  function clearFormatting(){
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
-    let text = ta.value.substring(start, end); if(!text) return;
-    text = text.replace(/^#{1,6}\s+/gm, '')
-               .replace(/\*\*([^*]+)\*\*/g, '$1')
-               .replace(/\*([^*]+)\*/g, '$1')
-               .replace(/~~([^~]+)~~/g, '$1')
-               .replace(/^[-*]\s+/gm, '')
-               .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-    ta.setRangeText(text, start, end, 'end'); refreshAll();
-  }
   function insertDateTime(){
     const ta = activeTextarea();
     const now = new Date().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
@@ -1195,7 +1170,8 @@
     }
     if(sel.toLowerCase() === term.toLowerCase()){
       const start = ta.selectionStart;
-      ta.setRangeText(replaceInput.value, ta.selectionStart, ta.selectionEnd, 'end');
+      ta.focus();
+      document.execCommand('insertText', false, replaceInput.value); // así Ctrl+Z sí puede deshacerlo
       refreshAll();
       ta.setSelectionRange(start + replaceInput.value.length, start + replaceInput.value.length);
       searchDir(true); // deja lista la siguiente coincidencia para el próximo clic
@@ -1210,9 +1186,11 @@
     const before = ta.value;
     const after = before.replace(re, safeReplacement);
     if(after === before){ showToast('No se encontró "' + term + '"'); return; }
-    ta.value = after;
+    ta.focus();
+    ta.setSelectionRange(0, before.length);
+    document.execCommand('insertText', false, after); // así Ctrl+Z sí puede deshacerlo
     refreshAll();
-    showToast('Reemplazado en todas las coincidencias ✓');
+    showToast('Reemplazado en todas las coincidencias ✓ (Ctrl+Z para deshacer)');
   }
 
   function gotoLine(){
@@ -1292,11 +1270,6 @@
   function closeModal(){ modalOverlay.classList.remove('open'); const ta = activeTextarea(); ta && ta.focus(); }
   modalOverlay.addEventListener('click', function(e){ if(e.target === modalOverlay) closeModal(); });
 
-  function syncMdToolbarDisplay(){
-    const t = activeTab();
-    mdToolbar.classList.toggle('show', !!(t && t.isMarkdown));
-  }
-
   function buildSchemeMenu(){
     let html = '';
     THEMES.forEach(function(pair){
@@ -1334,66 +1307,13 @@
         try{
           const file = await r.handle.getFile();
           const text = await file.text();
-          const isMd = /\.(md|markdown)$/i.test(file.name);
-          createTab({ name: file.name, content: text, handle: r.handle, isMarkdown: isMd });
+          createTab({ name: file.name, content: text, handle: r.handle });
         }catch(err){ alert('No se pudo reabrir el archivo (puede que ya no exista o se movió).'); }
         closeAllMenus();
       });
       recentSubmenu.appendChild(btn);
     });
   }
-
-  // ============ Barra de formato Markdown ============
-  function wrapSelection(prefix, suffix){
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
-    const sel = ta.value.substring(start, end) || 'texto';
-    ta.setRangeText(prefix + sel + suffix, start, end, 'end');
-    ta.selectionStart = start + prefix.length;
-    ta.selectionEnd = start + prefix.length + sel.length;
-    ta.focus(); refreshAll();
-  }
-  function prefixLines(prefix){
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
-    const value = ta.value;
-    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-    let lineEnd = value.indexOf('\n', end); if(lineEnd === -1) lineEnd = value.length;
-    const block = value.substring(lineStart, lineEnd);
-    const newBlock = block.split('\n').map(l => prefix + l).join('\n');
-    ta.setRangeText(newBlock, lineStart, lineEnd, 'end');
-    ta.focus(); refreshAll();
-  }
-  function insertLink(){
-    const url = prompt('URL del enlace:', 'https://'); if(url === null) return;
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
-    const sel = ta.value.substring(start, end) || 'texto del enlace';
-    ta.setRangeText('[' + sel + '](' + url + ')', start, end, 'end');
-    ta.focus(); refreshAll();
-  }
-  function insertTable(){
-    const ta = activeTextarea(); const start = ta.selectionStart;
-    const tpl = '\n| Columna 1 | Columna 2 |\n| --- | --- |\n| celda | celda |\n';
-    ta.setRangeText(tpl, start, ta.selectionEnd, 'end');
-    ta.focus(); refreshAll();
-  }
-  document.getElementById('mdBold').addEventListener('click', () => wrapSelection('**', '**'));
-  document.getElementById('mdItalic').addEventListener('click', () => wrapSelection('*', '*'));
-  document.getElementById('mdStrike').addEventListener('click', () => wrapSelection('~~', '~~'));
-  document.getElementById('mdList').addEventListener('click', () => prefixLines('- '));
-  document.getElementById('mdLink').addEventListener('click', insertLink);
-  document.getElementById('mdTable').addEventListener('click', insertTable);
-  document.getElementById('mdClear').addEventListener('click', clearFormatting);
-  headingSelect.addEventListener('change', function(){
-    const v = headingSelect.value;
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
-    const value = ta.value;
-    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-    let lineEndIdx = value.indexOf('\n', end); if(lineEndIdx === -1) lineEndIdx = value.length;
-    let line = value.substring(lineStart, lineEndIdx).replace(/^#{1,6}\s+/, '');
-    if(v) line = '#'.repeat(parseInt(v, 10)) + ' ' + line;
-    ta.setRangeText(line, lineStart, lineEndIdx, 'end');
-    ta.focus(); refreshAll();
-    headingSelect.value = '';
-  });
 
   // ============ Menú: apertura / cierre ============
   const menuEls = Array.from(document.querySelectorAll('.menubar > .menu'));
@@ -1445,11 +1365,11 @@
 
   // ============ despacho de acciones del menú ============
   const ACTIONS = {
-    newTab, newWindow, newMarkdown: newMarkdownTab, newTemplate: newFromTemplate, open: openFile,
+    newTab, newWindow, open: openFile,
     save: () => saveTab(activeTab()), saveAs: () => saveTabAs(activeTab()), saveAll: saveAllTabs,
     chooseFolder: chooseSaveFolder,
     print: printActive, closeTab: () => closeTab(activeTabId), closeWindow: closeWindowOrTab, exitApp: closeWindowOrTab,
-    undo: doUndo, cut: doCut, copy: doCopy, paste: doPaste, delete: doDelete, clearFormat: clearFormatting,
+    undo: doUndo, cut: doCut, copy: doCopy, paste: doPaste, delete: doDelete,
     find: () => toggleFindBar(true), findNext: () => searchDir(true), findPrev: () => searchDir(false),
     searchAll: searchAllNotes,
     replace: () => { toggleFindBar(true); toggleReplaceRow(true); }, goto: gotoLine,
