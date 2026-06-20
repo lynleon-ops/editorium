@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="nord">
+<html lang="es" data-theme="github-light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 4.9</title>
+<title>Editorium 5.0</title>
 <style>
   :root{
     --editor-font-size:14px;
@@ -54,7 +54,7 @@
     display:flex;justify-content:center;height:100vh;overflow:hidden;
     background:var(--bg-page);color:var(--fg-text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
-    padding:22px 16px;transition:background .2s;
+    padding:0 16px 22px 16px;transition:background .2s;
   }
   button, select, input{font-family:inherit;}
   button:focus-visible, select:focus-visible, input:focus-visible{
@@ -190,17 +190,17 @@
     background:var(--bg-toolbar);border-right:1px solid var(--border);
   }
   .notesPanel.open{width:220px;}
-  .notesPanel-inner{width:220px;height:100%;overflow-y:auto;padding:10px;}
+  .notesPanel-inner{width:220px;height:100%;overflow-y:auto;padding:4px;}
   .notesPanel h4{
-    font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-muted);
-    margin:2px 0 8px;padding:0 4px;
+    padding:6px 9px 2px;font-size:.68rem;color:var(--fg-muted);
+    text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px;
   }
   .notesPanel-item{
-    padding:6px 8px;font-size:.8rem;cursor:pointer;color:var(--fg-text);
+    padding:7px 9px;font-size:.78rem;cursor:pointer;color:var(--fg-text);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
-  .notesPanel-item:hover{background:var(--border);}
-  .notesPanel-empty{color:var(--fg-muted);font-size:.76rem;padding:4px;line-height:1.6;}
+  .notesPanel-item:hover{background:var(--accent);color:var(--bg-main);}
+  .notesPanel-empty{color:var(--fg-muted);font-size:.78rem;padding:7px 9px;line-height:1.6;}
   .notesPanel-empty button{
     margin-top:8px;background:var(--accent);color:var(--bg-main);border:none;
     padding:6px 10px;font-size:.76rem;cursor:pointer;width:100%;
@@ -414,14 +414,14 @@
       <span id="statusWords">0 palabras</span>
       <span id="statusChars">0 caracteres</span>
       <span id="statusEncoding">UTF-8</span>
-      <span id="statusScheme">Nord</span>
+      <span id="statusScheme">GitHub Light</span>
       <span id="folderStatus"></span>
       <span id="locationWarning"></span>
     </div>
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V4.9.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V5.0.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
