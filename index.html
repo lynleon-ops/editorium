@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 4.3</title>
+<title>Editorium 4.4</title>
 <style>
   :root{
     --editor-font-size:14px;
     --editor-font-family:"Cascadia Code","JetBrains Mono","Fira Code",ui-monospace,Consolas,"Courier New",monospace;
     --save-alert:#ff8c00; /* naranja fijo para el botón Guardar, no cambia con el tema */
+    --selection-bg:#ffd400; /* resaltado de selección/búsqueda, fijo y bien visible en cualquier tema */
+    --selection-fg:#1a1a1a;
     /* Monokai */
     --bg-main:#272822; --bg-toolbar:#1e1f1c; --bg-gutter:#2f3029; --bg-page:#171712;
     --fg-text:#f8f8f2; --fg-muted:#8a877a; --accent:#a6e22e; --accent2:#f92672;
@@ -202,10 +204,15 @@
     caret-color:var(--caret);white-space:pre-wrap;overflow-y:auto;overflow-x:hidden;
   }
   textarea.editor.active{display:block;}
-  textarea.editor::selection{background:var(--selection);}
+  textarea.editor::selection{background:var(--selection-bg);color:var(--selection-fg);}
   textarea.editor::-webkit-scrollbar{width:11px;height:11px;}
   textarea.editor::-webkit-scrollbar-thumb{background:var(--border);border-radius:0;}
   textarea.editor::-webkit-scrollbar-track{background:var(--bg-main);}
+  @keyframes searchFlash{
+    0%{box-shadow:inset 0 0 0 3px var(--selection-bg);}
+    100%{box-shadow:inset 0 0 0 3px transparent;}
+  }
+  textarea.editor.flash{animation:searchFlash .5s ease-out;}
   textarea.editor::placeholder{color:var(--fg-muted);}
 
   /* ---------- Buscar / Reemplazar ---------- */
@@ -411,7 +418,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V4.3. All rights reserved.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V4.4. All rights reserved.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -1165,6 +1172,10 @@
     }
     if(idx === -1){ findInput.classList.add('notfound'); return; }
     ta.focus(); ta.setSelectionRange(idx, idx + term.length); updateCursorStatus();
+    ta.classList.remove('flash');
+    void ta.offsetWidth; // fuerza reflow para poder reiniciar la animación si se repite seguido
+    ta.classList.add('flash');
+    setTimeout(() => ta.classList.remove('flash'), 500);
   }
   function replaceOne(){
     const ta = activeTextarea(); const term = findInput.value; if(!term) return;
