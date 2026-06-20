@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="nord">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorium 4.7</title>
+<style>
+  :root{
+    --editor-font-size:14px;
+    --editor-font-family:"Cascadia Code","JetBrains Mono","Fira Code",ui-monospace,Consolas,"Courier New",monospace;
+    --save-alert:#ff8c00; /* naranja fijo para el botón Guardar, no cambia con el tema */
+    --selection-bg:#ffd400; /* resaltado de selección/búsqueda, fijo y bien visible en cualquier tema */
+    --selection-fg:#1a1a1a;
+    /* Monokai */
+    --bg-main:#272822; --bg-toolbar:#1e1f1c; --bg-gutter:#2f3029; --bg-page:#171712;
+    --fg-text:#f8f8f2; --fg-muted:#8a877a; --accent:#a6e22e; --accent2:#f92672;
+    --border:#3e3d32; --selection:#49483e; --caret:#a6e22e;
+  }
+  html[data-theme="dracula"]{
+    --bg-main:#282a36; --bg-toolbar:#21222c; --bg-gutter:#2d2f3d; --bg-page:#191a22;
+    --fg-text:#f8f8f2; --fg-muted:#9aa3c9; --accent:#bd93f9; --accent2:#ff79c6;
+    --border:#44475a; --selection:#44475a; --caret:#bd93f9;
+  }
+  html[data-theme="solarized-dark"]{
+    --bg-main:#002b36; --bg-toolbar:#00212b; --bg-gutter:#073642; --bg-page:#00161c;
+    --fg-text:#93a1a1; --fg-muted:#6c8585; --accent:#2aa198; --accent2:#268bd2;
+    --border:#0a4554; --selection:#0a4554; --caret:#2aa198;
+  }
+  html[data-theme="solarized-light"]{
+    --bg-main:#fdf6e3; --bg-toolbar:#f5edd6; --bg-gutter:#eee8d5; --bg-page:#e4ded0;
+    --fg-text:#586e75; --fg-muted:#93a1a1; --accent:#268bd2; --accent2:#cb4b16;
+    --border:#e4dcc4; --selection:#e3dcc6; --caret:#cb4b16;
+  }
+  html[data-theme="nord"]{
+    --bg-main:#2e3440; --bg-toolbar:#262b36; --bg-gutter:#3b4252; --bg-page:#222631;
+    --fg-text:#d8dee9; --fg-muted:#8b97ab; --accent:#88c0d0; --accent2:#b48ead;
+    --border:#434c5e; --selection:#434c5e; --caret:#88c0d0;
+  }
+  html[data-theme="gruvbox"]{
+    --bg-main:#282828; --bg-toolbar:#1d2021; --bg-gutter:#32302f; --bg-page:#1a1a1a;
+    --fg-text:#ebdbb2; --fg-muted:#a89984; --accent:#fe8019; --accent2:#b8bb26;
+    --border:#45403d; --selection:#45403d; --caret:#fe8019;
+  }
+  /* GitHub Light — valores oficiales del sistema de diseño Primer de GitHub */
+  html[data-theme="github-light"]{
+    --bg-main:#ffffff; --bg-toolbar:#f6f8fa; --bg-gutter:#f6f8fa; --bg-page:#c9d1d9;
+    --fg-text:#1f2328; --fg-muted:#59636e; --accent:#0969da; --accent2:#cf222e;
+    --border:#d0d7de; --selection:#b6e3ff; --caret:#0969da;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    display:flex;justify-content:center;height:100vh;overflow:hidden;
+    background:var(--bg-page);color:var(--fg-text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    padding:22px 16px;transition:background .2s;
+  }
+  button, select, input{font-family:inherit;}
+  button:focus-visible, select:focus-visible, input:focus-visible{
+    outline:2px solid var(--accent); outline-offset:1px;
+  }
+
+  /* ---------- Recuadro boxed de la app (máx. 1000px) ---------- */
+  .app-shell{
+    width:100%;max-width:1000px;display:flex;flex-direction:column;min-height:0;
+    position:relative;
+    background:var(--bg-main);border:1px solid var(--border);border-radius:0;
+    box-shadow:0 30px 70px rgba(0,0,0,.5);overflow:hidden;
+  }
+
+  /* ---------- Botón de guardado (mismo estilo que el resto de botones del menú) ---------- */
+  .saveBtn{
+    margin-left:auto;background:transparent;border:none;color:var(--fg-text);
+    padding:16px 16px;font-size:.78rem;cursor:pointer;border-radius:0;font-weight:600;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .saveBtn:hover{background:var(--border);}
+  .saveBtn.dirty{background:var(--save-alert);color:#1a1a1a;}
+  .saveBtn.dirty:hover{opacity:.85;}
+
+  /* ---------- Aviso flotante (toast) ---------- */
+  .toast{
+    position:absolute;top:54px;left:50%;
+    transform:translateX(-50%) translateY(-8px);
+    background:var(--bg-toolbar);border:1px solid var(--border);color:var(--fg-text);
+    padding:7px 16px;border-radius:0;font-size:.78rem;
+    box-shadow:0 10px 28px rgba(0,0,0,.45);
+    opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:90;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- Aviso para reconectar la carpeta de guardado ---------- */
+  .reconnectBar{
+    display:none;align-items:center;gap:10px;background:var(--bg-gutter);
+    border-bottom:1px solid var(--border);padding:6px 14px;font-size:.78rem;color:var(--fg-text);
+  }
+  .reconnectBar.show{display:flex;}
+  .reconnectBar button{
+    background:var(--accent);color:var(--bg-main);border:none;border-radius:0;
+    padding:4px 10px;font-size:.76rem;cursor:pointer;font-weight:600;
+  }
+  .reconnectBar .dismiss{
+    margin-left:auto;background:transparent;color:var(--fg-muted);border:none;cursor:pointer;font-size:.9rem;
+  }
+
+  #folderStatus.active{color:var(--accent);}
+  #folderStatus.pending{color:var(--save-alert);cursor:pointer;text-decoration:underline;}
+  #folderStatus.none{color:var(--fg-muted);}
+  #locationWarning{color:var(--save-alert);}
+
+  /* ---------- Pestañas ---------- */
+  .tabsbar{
+    display:flex;align-items:stretch;background:var(--bg-toolbar);
+    border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;
+  }
+  .tabsbar::-webkit-scrollbar{height:0;}
+  .tabpill{
+    display:flex;align-items:center;gap:7px;padding:7px 10px 7px 12px;
+    border-right:1px solid var(--border);cursor:pointer;white-space:nowrap;
+    font-size:.78rem;color:var(--fg-muted);max-width:200px;flex-shrink:0;
+  }
+  .tabpill.active{background:var(--bg-main);color:var(--fg-text);}
+  .tabpill .ficon{width:8px;height:8px;border-radius:0;background:var(--fg-muted);flex-shrink:0;}
+  .tabpill.active .ficon{background:var(--accent);}
+  .tabpill .tname{overflow:hidden;text-overflow:ellipsis;}
+  .tabpill .dirty{color:var(--accent2);}
+  .tabpill .tclose{
+    color:var(--fg-muted);border:none;background:transparent;cursor:pointer;
+    padding:2px 4px;border-radius:0;font-size:.85rem;line-height:1;
+  }
+  .tabpill .tclose:hover{background:var(--border);color:var(--fg-text);}
+  .tabAdd{
+    border:none;background:transparent;color:var(--fg-muted);cursor:pointer;
+    padding:0 14px;font-size:.95rem;flex-shrink:0;
+  }
+  .tabAdd:hover{color:var(--accent);}
+
+  /* ---------- Barra de menús ---------- */
+  .menubar{
+    display:flex;align-items:center;background:var(--bg-toolbar);
+    border-bottom:1px solid var(--border);flex-shrink:0;padding:0 4px;
+  }
+  .menu{position:relative;}
+  .menu-btn{
+    background:transparent;border:none;color:var(--fg-text);
+    padding:16px 16px;font-size:.78rem;cursor:pointer;border-radius:0;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .menu-btn:hover{background:var(--border);}
+  .menu.open > .menu-btn{background:var(--border);}
+  .menu-dropdown{
+    display:none;position:absolute;top:100%;left:0;
+    background:var(--bg-toolbar);border:1px solid var(--border);border-radius:0;
+    min-width:235px;box-shadow:0 12px 30px rgba(0,0,0,.5);padding:4px;z-index:60;
+  }
+  .menu-dropdown.dd-right{left:auto;right:0;}
+  .mi-label{
+    padding:6px 9px 2px;font-size:.68rem;color:var(--fg-muted);
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .menu.open > .menu-dropdown{display:block;}
+  .mi{
+    display:flex;justify-content:flex-start;align-items:center;gap:14px;
+    width:100%;background:transparent;border:none;color:var(--fg-text);
+    padding:7px 9px;font-size:.78rem;text-align:left;cursor:pointer;border-radius:0;
+  }
+  .mi .check{width:13px;display:inline-block;color:var(--accent);}
+  .mi:hover:not(.disabled){background:var(--accent);color:var(--bg-main);}
+  .mi:hover:not(.disabled) .check{color:var(--bg-main);}
+  .mi.disabled{color:var(--fg-muted);cursor:default;}
+  .mi .kbd{color:var(--fg-muted);font-size:.7rem;margin-left:auto;}
+  .mi:hover:not(.disabled) .kbd{color:var(--bg-main);opacity:.75;}
+  .mi-sep{height:1px;background:var(--border);margin:4px 3px;}
+  .submenuwrap{position:relative;}
+  .submenuwrap > .menu-dropdown.submenu{top:-4px;left:100%;min-width:200px;}
+  .submenuwrap.open > .submenu{display:block;}
+  .submenuwrap.disabled > .mi{color:var(--fg-muted);cursor:default;}
+  .submenuwrap.disabled > .mi:hover{background:transparent;color:var(--fg-muted);}
+
+  /* ---------- Barra de formato Markdown ---------- */
+  .mdtoolbar{
+    display:none;align-items:center;gap:4px;padding:5px 8px;
+    background:var(--bg-toolbar);border-bottom:1px solid var(--border);flex-shrink:0;
+  }
+  .mdtoolbar.show{display:flex;}
+  .mdtoolbar select, .mdtoolbar button{
+    background:transparent;border:1px solid transparent;color:var(--fg-text);
+    padding:5px 8px;border-radius:0;font-size:.82rem;cursor:pointer;
+  }
+  .mdtoolbar select{border:1px solid var(--border);}
+  .mdtoolbar button:hover{background:var(--border);}
+  .mdtoolbar .mdsep{width:1px;background:var(--border);align-self:stretch;margin:2px 4px;}
+
+  /* ---------- Área de edición (columna fija de 110 caracteres) ---------- */
+  .workspace{flex:1;display:flex;min-height:0;}
+  .editorstack{flex:1;min-width:0;}
+  textarea.editor{
+    display:none;
+    width:110ch;max-width:100%;height:100%;margin:0 auto;
+    background:var(--bg-main);color:var(--fg-text);border:none;outline:none;
+    resize:none;padding:16px 22px;font-size:var(--editor-font-size);line-height:1.5;tab-size:4;
+    font-family:var(--editor-font-family);
+    caret-color:var(--caret);white-space:pre-wrap;overflow-y:auto;overflow-x:hidden;
+  }
+  textarea.editor.active{display:block;}
+  textarea.editor::selection{background:var(--selection-bg);color:var(--selection-fg);}
+  textarea.editor::-webkit-scrollbar{width:11px;height:11px;}
+  textarea.editor::-webkit-scrollbar-thumb{background:var(--border);border-radius:0;}
+  textarea.editor::-webkit-scrollbar-track{background:var(--bg-main);}
+  @keyframes searchFlash{
+    0%{box-shadow:inset 0 0 0 3px var(--selection-bg);}
+    100%{box-shadow:inset 0 0 0 3px transparent;}
+  }
+  textarea.editor.flash{animation:searchFlash .5s ease-out;}
+  textarea.editor::placeholder{color:var(--fg-muted);}
+
+  /* ---------- Buscar / Reemplazar ---------- */
+  .findbar{
+    display:flex;flex-direction:column;gap:5px;padding:6px 10px;
+    background:var(--bg-toolbar);border-top:1px solid var(--border);flex-shrink:0;
+  }
+  .findbar.hidden{display:none;}
+  .findrow{display:flex;align-items:center;gap:6px;}
+  .findbar input{
+    flex:0 1 240px;background:var(--bg-main);color:var(--fg-text);
+    border:1px solid var(--border);border-radius:0;padding:5px 8px;font-size:.8rem;
+  }
+  .findbar input.notfound{border-color:var(--accent2);}
+  .findbar button{
+    background:transparent;border:1px solid var(--border);color:var(--fg-text);
+    padding:5px 10px;border-radius:0;font-size:.76rem;cursor:pointer;
+  }
+  .findbar button:hover{background:var(--border);}
+  .findbar .findclose{margin-left:auto;color:var(--fg-muted);border:none;font-size:1rem;}
+  .replacerow.hidden{display:none;}
+
+  /* ---------- Barra de estado ---------- */
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+    background:var(--bg-toolbar);border-top:1px solid var(--border);
+    padding:6px 14px;font-size:.74rem;color:var(--fg-muted);flex-shrink:0;
+    font-family:var(--editor-font-family);row-gap:4px;
+  }
+  .statusbar.hidden{display:none;}
+  .statusbar .left, .statusbar .right span{white-space:nowrap;}
+  .statusbar .right{display:flex;flex-wrap:wrap;gap:6px 16px;row-gap:4px;justify-content:flex-end;}
+
+  @media (max-width:640px){
+    .statusbar{font-size:.7rem;padding:6px 10px;}
+    .statusbar .right{display:none;}
+  }
+
+  .appFooter{
+    text-align:left;background:var(--bg-page);color:var(--fg-muted);
+    padding:16px 16px;font-size:.7rem;
+    font-family:var(--editor-font-family);flex-shrink:0;
+  }
+
+  /* ---------- Modal genérico ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;
+    align-items:center;justify-content:center;z-index:100;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:var(--bg-toolbar);border:1px solid var(--border);border-radius:0;
+    padding:18px 20px;min-width:280px;box-shadow:0 18px 50px rgba(0,0,0,.55);
+    font-size:.85rem;color:var(--fg-text);
+  }
+  .modal-box h3{margin:0 0 12px 0;font-size:.95rem;color:var(--accent);}
+  .modal-error{color:var(--save-alert);font-size:.76rem;margin-top:6px;min-height:14px;}
+  .modal-box.wide{min-width:380px;}
+  .search-results{max-height:280px;overflow-y:auto;margin-top:10px;border-top:1px solid var(--border);}
+  .search-status{color:var(--fg-muted);font-size:.78rem;padding:10px 2px;}
+  .search-result{padding:8px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
+  .search-result:hover{background:var(--border);}
+  .sr-name{font-size:.82rem;color:var(--accent);}
+  .sr-snippet{font-size:.74rem;color:var(--fg-muted);margin-top:2px;line-height:1.4;}
+  .pinBtn{
+    background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
+    font-size:.8rem;padding:0 2px;flex-shrink:0;
+  }
+  .pinBtn.pinned{color:var(--save-alert);}
+  .modal-box label{display:block;margin:10px 0 4px;color:var(--fg-muted);font-size:.78rem;}
+  .modal-box select, .modal-box input{
+    width:100%;background:var(--bg-main);color:var(--fg-text);
+    border:1px solid var(--border);border-radius:0;padding:6px 8px;font-size:.85rem;
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+  .modal-actions button{
+    background:transparent;border:1px solid var(--border);color:var(--fg-text);
+    padding:6px 14px;border-radius:0;cursor:pointer;font-size:.8rem;
+  }
+  .modal-actions button:hover{background:var(--border);}
+  .modal-actions button[data-modal-ok]{background:var(--accent);color:var(--bg-main);border-color:var(--accent);}
+</style>
+</head>
+<body>
+
+  <div class="app-shell">
+  <div class="toast" id="toast"></div>
+  <div class="reconnectBar" id="reconnectBar">
+    <span id="reconnectText">La carpeta de guardado fija necesita confirmarse de nuevo en esta sesión.</span>
+    <button type="button" id="reconnectBtn">Reconectar carpeta</button>
+    <button type="button" class="dismiss" id="reconnectDismiss">✕</button>
+  </div>
+  <div class="tabsbar" id="tabsbar"></div>
+  <button class="tabAdd hidden" id="dummy" style="display:none"></button>
+
+  <nav class="menubar">
+    <div class="menu" data-menu="file">
+      <button class="menu-btn">Archivo</button>
+      <div class="menu-dropdown">
+        <button class="mi" data-action="newTab">Nueva pestaña<span class="kbd">Ctrl+N</span></button>
+        <button class="mi" data-action="newWindow">Nueva ventana<span class="kbd">Ctrl+Shift+N</span></button>
+        <button class="mi" data-action="newMarkdown">Nueva pestaña Markdown</button>
+        <button class="mi" data-action="newTemplate">Nueva desde plantilla…</button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="open">Abrir<span class="kbd">Ctrl+O</span></button>
+        <div class="submenuwrap" id="recentWrap">
+          <button class="mi has-sub" data-sub="true">Reciente<span class="kbd">›</span></button>
+          <div class="menu-dropdown submenu" id="recentSubmenu"></div>
+        </div>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="save">Guardar<span class="kbd">Ctrl+S</span></button>
+        <button class="mi" data-action="saveAs">Guardar como<span class="kbd">Ctrl+Shift+S</span></button>
+        <button class="mi" data-action="saveAll">Guardar todo<span class="kbd">Ctrl+Alt+S</span></button>
+        <button class="mi" data-action="chooseFolder">Carpeta de guardado…</button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="print">Imprimir<span class="kbd">Ctrl+P</span></button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="closeTab">Cerrar pestaña<span class="kbd">Ctrl+W</span></button>
+        <button class="mi" data-action="closeWindow">Cerrar ventana<span class="kbd">Ctrl+Shift+W</span></button>
+        <button class="mi" data-action="exitApp">Salir</button>
+      </div>
+    </div>
+
+    <div class="menu" data-menu="edit">
+      <button class="menu-btn">Edición</button>
+      <div class="menu-dropdown">
+        <button class="mi" data-action="undo">Deshacer<span class="kbd">Ctrl+Z</span></button>
+        <button class="mi" data-action="cut">Cortar<span class="kbd">Ctrl+X</span></button>
+        <button class="mi" data-action="copy">Copiar<span class="kbd">Ctrl+C</span></button>
+        <button class="mi" data-action="paste">Pegar<span class="kbd">Ctrl+V</span></button>
+        <button class="mi" data-action="delete">Eliminar<span class="kbd">Supr</span></button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="clearFormat">Borrar formato</button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="find">Buscar<span class="kbd">Ctrl+F</span></button>
+        <button class="mi" data-action="findNext">Buscar siguiente<span class="kbd">F3</span></button>
+        <button class="mi" data-action="findPrev">Buscar anterior<span class="kbd">Shift+F3</span></button>
+        <button class="mi" data-action="searchAll">Buscar en todas las notas…</button>
+        <button class="mi" data-action="replace">Reemplazar<span class="kbd">Ctrl+H</span></button>
+        <button class="mi" data-action="goto">Ir a<span class="kbd">Ctrl+G</span></button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="selectAll">Seleccionar todo<span class="kbd">Ctrl+A</span></button>
+        <button class="mi" data-action="dateTime">Fecha y hora<span class="kbd">F5</span></button>
+      </div>
+    </div>
+
+    <div class="menu" data-menu="font" id="fontMenuWrap">
+      <button class="menu-btn">Fuente</button>
+      <div class="menu-dropdown dd-right" id="fontMenuDropdown"></div>
+    </div>
+
+    <div class="menu" data-menu="scheme">
+      <button class="menu-btn">Color</button>
+      <div class="menu-dropdown dd-right" id="schemeMenuDropdown"></div>
+    </div>
+
+    <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)">Guardar</button>
+  </nav>
+
+  <div class="mdtoolbar" id="mdToolbar">
+    <select id="headingSelect" title="Encabezado">
+      <option value="">Párrafo</option>
+      <option value="1">H1</option>
+      <option value="2">H2</option>
+      <option value="3">H3</option>
+    </select>
+    <span class="mdsep"></span>
+    <button type="button" id="mdList" title="Lista">≡ Lista</button>
+    <span class="mdsep"></span>
+    <button type="button" id="mdBold" title="Negrita"><b>B</b></button>
+    <button type="button" id="mdItalic" title="Cursiva"><i>I</i></button>
+    <button type="button" id="mdStrike" title="Tachado"><s>S</s></button>
+    <span class="mdsep"></span>
+    <button type="button" id="mdLink" title="Enlace">🔗</button>
+    <button type="button" id="mdTable" title="Tabla">⊞</button>
+    <span class="mdsep"></span>
+    <button type="button" id="mdClear" title="Borrar formato">Aɓ̶</button>
+  </div>
+
+  <main class="workspace">
+    <div class="editorstack" id="editorstack"></div>
+  </main>
+
+  <div class="findbar hidden" id="findbar">
+    <div class="findrow">
+      <input type="text" id="findInput" placeholder="Buscar…">
+      <button type="button" id="findNextBtn">Siguiente</button>
+      <button type="button" id="findPrevBtn">Anterior</button>
+      <button type="button" id="toggleReplaceBtn">Reemplazar ›</button>
+      <button type="button" class="findclose" id="findCloseBtn">✕</button>
+    </div>
+    <div class="findrow replacerow hidden" id="replaceRow">
+      <input type="text" id="replaceInput" placeholder="Reemplazar con…">
+      <button type="button" id="replaceOneBtn">Reemplazar</button>
+      <button type="button" id="replaceAllBtn">Reemplazar todo</button>
+    </div>
+  </div>
+
+  <footer class="statusbar" id="statusbar">
+    <div class="left" id="statusLeft">Ln 1, Col 1</div>
+    <div class="right">
+      <span id="statusWords">0 palabras</span>
+      <span id="statusChars">0 caracteres</span>
+      <span id="statusEncoding">UTF-8</span>
+      <span id="statusScheme">Nord</span>
+      <span id="folderStatus"></span>
+      <span id="locationWarning"></span>
+    </div>
+  </footer>
+
+  <footer class="appFooter">
+    Copyright &copy; <span id="copyYear"></span> by Editorium V4.7.
+  </footer>
+
+  <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box" id="modalBox"></div>
+  </div>
+
+<script>
+(function(){
+  const tabsbar = document.getElementById('tabsbar');
+  const editorstack = document.getElementById('editorstack');
+  const fileInput = document.getElementById('fileInput');
+  const findbar = document.getElementById('findbar');
+  const findInput = document.getElementById('findInput');
+  const replaceInput = document.getElementById('replaceInput');
+  const replaceRow = document.getElementById('replaceRow');
+  const statusbar = document.getElementById('statusbar');
+  const statusLeft = document.getElementById('statusLeft');
+  const statusWords = document.getElementById('statusWords');
+  const statusChars = document.getElementById('statusChars');
+  const statusScheme = document.getElementById('statusScheme');
+  const mdToolbar = document.getElementById('mdToolbar');
+  const recentSubmenu = document.getElementById('recentSubmenu');
+  const fontMenuDropdown = document.getElementById('fontMenuDropdown');
+  const schemeMenuDropdown = document.getElementById('schemeMenuDropdown');
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalBox = document.getElementById('modalBox');
+  const headingSelect = document.getElementById('headingSelect');
+  const quickSaveBtn = document.getElementById('quickSaveBtn');
+  const toastEl = document.getElementById('toast');
+  const reconnectBar = document.getElementById('reconnectBar');
+  const reconnectBtn = document.getElementById('reconnectBtn');
+  const reconnectDismiss = document.getElementById('reconnectDismiss');
+
+  const supportsFSAccess = 'showOpenFilePicker' in window;
+  const THEMES = [
+    ['monokai','Monokai'], ['dracula','Dracula'],
+    ['solarized-dark','Solarized Dark'], ['solarized-light','Solarized Light'],
+    ['nord','Nord'], ['gruvbox','Gruvbox Dark'], ['github-light','GitHub Light']
+  ];
+
+  let tabs = [];        // {id, name, handle, isMarkdown, ta, originalContent}
+  let activeTabId = null;
+  let tabCounter = 0;
+  let recentFiles = []; // {name, handle}  (solo en memoria de la sesión)
+  let saveDirHandle = null;   // FileSystemDirectoryHandle fija para guardar sin diálogo
+  let pendingDirHandle = null; // handle recuperado de IndexedDB que aún necesita permiso
+  let toastTimer = null;
+
+  // ============ Aviso flotante (toast) ============
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  // ============ IndexedDB: recordar la carpeta de guardado entre sesiones ============
+  function idbOpen(){
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('editorium-db', 1);
+      req.onupgradeneeded = () => { req.result.createObjectStore('settings'); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  async function idbSet(key, value){
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('settings', 'readwrite');
+      tx.objectStore('settings').put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+  async function idbGet(key){
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('settings', 'readonly');
+      const req = tx.objectStore('settings').get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function syncLocationWarning(){
+    const el = document.getElementById('locationWarning');
+    const t = activeTab();
+    if(!saveDirHandle || !t || !t.handle){ el.textContent = ''; return; }
+    try{
+      const rel = await saveDirHandle.resolve(t.handle);
+      el.textContent = (rel === null) ? '⚠ Esta nota está fuera de "' + saveDirHandle.name + '"' : '';
+    }catch(e){ el.textContent = ''; }
+  }
+
+  function syncFolderStatus(){
+    const el = document.getElementById('folderStatus');
+    if(!supportsFSAccess){
+      el.textContent = 'Carpeta fija no disponible (usa Chrome/Edge)';
+      el.className = 'none';
+      el.title = 'Este navegador no soporta elegir una carpeta fija de guardado.';
+      el.onclick = null;
+      return;
+    }
+    if(saveDirHandle){
+      el.textContent = 'Carpeta: ' + saveDirHandle.name + ' ✓';
+      el.className = 'active';
+      el.title = 'Guardar usa la carpeta "' + saveDirHandle.name + '" automáticamente, sin preguntar.';
+      el.onclick = null;
+    } else if(pendingDirHandle){
+      el.textContent = 'Carpeta: ' + pendingDirHandle.name + ' (reconectar)';
+      el.className = 'pending';
+      el.title = 'Haz clic para reconectar la carpeta "' + pendingDirHandle.name + '".';
+      el.onclick = () => reconnectBtn.click();
+    } else {
+      el.textContent = 'Sin carpeta fija';
+      el.className = 'none';
+      el.title = 'Archivo → Carpeta de guardado… para configurar una.';
+      el.onclick = null;
+    }
+  }
+
+  async function chooseSaveFolder(){
+    if(!supportsFSAccess){
+      alert('Tu navegador no permite fijar una carpeta de guardado. Usa Chrome o Edge para esta función.');
+      return;
+    }
+    try{
+      const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      saveDirHandle = handle;
+      reconnectBar.classList.remove('show');
+      try{ await idbSet('saveDirHandle', handle); }catch(e){ /* IndexedDB no disponible, seguimos solo en memoria */ }
+      showToast('Carpeta "' + handle.name + '" configurada ✓');
+      syncFolderStatus();
+      syncLocationWarning();
+    }catch(e){ /* el usuario canceló el selector */ }
+  }
+
+  async function restoreSaveFolder(){
+    try{
+      const handle = await idbGet('saveDirHandle');
+      if(!handle){ syncFolderStatus(); return; }
+      const perm = await handle.queryPermission({ mode: 'readwrite' });
+      if(perm === 'granted'){
+        saveDirHandle = handle;
+      } else {
+        pendingDirHandle = handle;
+        document.getElementById('reconnectText').textContent =
+          'La carpeta "' + handle.name + '" necesita confirmarse de nuevo en esta sesión.';
+        reconnectBar.classList.add('show');
+      }
+    }catch(e){ /* sin IndexedDB, o el handle ya no es válido: seguimos sin carpeta fija */ }
+    syncFolderStatus();
+    syncLocationWarning();
+  }
+  reconnectBtn.addEventListener('click', async function(){
+    if(!pendingDirHandle) return;
+    try{
+      const perm = await pendingDirHandle.requestPermission({ mode: 'readwrite' });
+      if(perm === 'granted'){
+        saveDirHandle = pendingDirHandle;
+        reconnectBar.classList.remove('show');
+        showToast('Carpeta "' + saveDirHandle.name + '" reconectada ✓');
+        syncFolderStatus();
+        syncLocationWarning();
+      }
+    }catch(e){ /* el usuario negó el permiso */ }
+  });
+  reconnectDismiss.addEventListener('click', () => reconnectBar.classList.remove('show'));
+
+  // ============ Buscar en todas las notas (carpeta fija) ============
+  function searchAllNotes(){
+    if(!saveDirHandle){
+      alert('Primero configura una carpeta de guardado fija en Archivo → Carpeta de guardado…, para poder buscar en todas tus notas.');
+      return;
+    }
+    openModal(
+      '<h3>Buscar en todas las notas</h3>' +
+      '<input type="text" id="globalSearchInput" placeholder="Escribe para buscar…">' +
+      '<div class="search-results" id="globalSearchResults"></div>' +
+      '<div class="modal-actions"><button data-modal-cancel>Cerrar</button></div>',
+      () => false
+    );
+    modalBox.classList.add('wide');
+    const input = document.getElementById('globalSearchInput');
+    const results = document.getElementById('globalSearchResults');
+    let debounceTimer = null;
+    input.addEventListener('input', function(){
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => runGlobalSearch(input.value, results), 250);
+    });
+  }
+
+  async function runGlobalSearch(term, resultsEl){
+    term = term.trim();
+    if(!term){ resultsEl.innerHTML = ''; return; }
+    resultsEl.innerHTML = '<div class="search-status">Buscando…</div>';
+    const tl = term.toLowerCase();
+    const matches = [];
+    try{
+      for await (const [name, handle] of saveDirHandle.entries()){
+        if(handle.kind !== 'file' || !/\.(txt|md|markdown)$/i.test(name)) continue;
+        let text = '';
+        try{ const file = await handle.getFile(); text = await file.text(); }
+        catch(e){ continue; }
+        const lower = text.toLowerCase();
+        if(name.toLowerCase().includes(tl) || lower.includes(tl)){
+          let snippet = '';
+          const idx = lower.indexOf(tl);
+          if(idx !== -1){
+            const start = Math.max(0, idx - 40);
+            snippet = (start > 0 ? '…' : '') + text.substring(start, idx + tl.length + 40).replace(/\s+/g, ' ') + '…';
+          }
+          matches.push({ name, handle, snippet });
+        }
+      }
+    }catch(e){ /* la carpeta pudo cambiar de permisos entre tanto */ }
+
+    if(matches.length === 0){
+      resultsEl.innerHTML = '<div class="search-status">Sin resultados.</div>';
+      return;
+    }
+    resultsEl.innerHTML = '';
+    matches.forEach(function(m){
+      const item = document.createElement('div');
+      item.className = 'search-result';
+      item.innerHTML = '<div class="sr-name">' + escapeHtml(m.name) + '</div>' +
+                        (m.snippet ? '<div class="sr-snippet">' + escapeHtml(m.snippet) + '</div>' : '');
+      item.addEventListener('click', async function(){
+        const existing = tabs.find(t => t.name === m.name && t.handle);
+        if(existing){ activateTab(existing.id); closeModal(); return; }
+        try{
+          const file = await m.handle.getFile();
+          const text = await file.text();
+          createTab({ name: m.name, content: text, handle: m.handle, isMarkdown: /\.(md|markdown)$/i.test(m.name) });
+        }catch(e){ alert('No se pudo abrir el archivo.'); }
+        closeModal();
+      });
+      resultsEl.appendChild(item);
+    });
+  }
+
+  // ============ utilidades de pestañas ============
+  function activeTab(){ return tabs.find(t => t.id === activeTabId); }
+  function activeTextarea(){ const t = activeTab(); return t ? t.ta : null; }
+  function isDirty(tab){ return tab.ta.value !== tab.originalContent; }
+
+  function buildTabsBar(){
+    tabsbar.innerHTML = '';
+    const sorted = [...tabs].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+    sorted.forEach(t => {
+      const pill = document.createElement('div');
+      pill.className = 'tabpill' + (t.id === activeTabId ? ' active' : '');
+      pill.innerHTML =
+        '<button class="pinBtn' + (t.pinned ? ' pinned' : '') + '" title="' + (t.pinned ? 'Quitar de fijados' : 'Fijar nota') + '">' +
+          (t.pinned ? '★' : '☆') +
+        '</button>' +
+        '<span class="ficon"></span>' +
+        '<span class="tname">' + escapeHtml(t.name) + '</span>' +
+        (isDirty(t) ? '<span class="dirty">●</span>' : '') +
+        '<button class="tclose" title="Cerrar">✕</button>';
+      pill.addEventListener('click', () => activateTab(t.id));
+      pill.querySelector('.pinBtn').addEventListener('click', (e) => {
+        e.stopPropagation(); t.pinned = !t.pinned; buildTabsBar();
+      });
+      pill.querySelector('.tname').title = 'Doble clic para guardar con otro nombre';
+      pill.querySelector('.tname').addEventListener('dblclick', (e) => {
+        e.stopPropagation(); saveTabAs(t);
+      });
+      pill.querySelector('.tclose').addEventListener('click', (e) => {
+        e.stopPropagation(); closeTab(t.id);
+      });
+      tabsbar.appendChild(pill);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'tabAdd'; addBtn.textContent = '+'; addBtn.title = 'Nueva pestaña';
+    addBtn.addEventListener('click', () => newTab());
+    tabsbar.appendChild(addBtn);
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function createTab(opts){
+    opts = opts || {};
+    const id = 'tab' + (++tabCounter);
+    const ta = document.createElement('textarea');
+    ta.className = 'editor';
+    ta.spellcheck = false;
+    ta.placeholder = 'Escribe tu nota aquí…';
+    ta.value = opts.content || '';
+    editorstack.appendChild(ta);
+
+    const tab = {
+      id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
+      isMarkdown: !!opts.isMarkdown, ta, originalContent: opts.content || '', pinned: false
+    };
+    tabs.push(tab);
+    attachEditorEvents(ta);
+    if(opts.makeActive !== false) activateTab(id);
+    else buildTabsBar();
+    return tab;
+  }
+
+  function activateTab(id){
+    activeTabId = id;
+    tabs.forEach(t => t.ta.classList.toggle('active', t.id === id));
+    buildTabsBar();
+    refreshAll();
+    syncMdToolbarDisplay();
+    syncLocationWarning();
+    activeTextarea() && activeTextarea().focus();
+  }
+
+  function closeTab(id){
+    const tab = tabs.find(t => t.id === id);
+    if(!tab) return;
+    if(isDirty(tab) && !confirm('"' + tab.name + '" tiene cambios sin guardar. ¿Cerrar de todas formas?')) return;
+    const idx = tabs.indexOf(tab);
+    tab.ta.remove();
+    tabs.splice(idx, 1);
+    if(tabs.length === 0){
+      createTab({ name: 'sin-título.txt' });
+      return;
+    }
+    if(activeTabId === id){
+      const next = tabs[idx] || tabs[idx - 1];
+      activateTab(next.id);
+    } else {
+      buildTabsBar();
+    }
+  }
+
+  const GENERIC_NAMES = ['nota','nota.txt','nota.md','sin-título','sin-titulo',
+    'sin-título.txt','sin-titulo.txt','untitled','untitled.txt','documento','documento.txt'];
+  function isGenericName(name){ return GENERIC_NAMES.includes(name.trim().toLowerCase()); }
+
+  function newTab(){
+    openModal(
+      '<h3>Nuevo documento</h3><label>Nombre del archivo</label>' +
+      '<input type="text" id="newNameInput" placeholder="ej: ideas-articulo-cuba.txt">' +
+      '<div class="modal-error" id="newNameError"></div>' +
+      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
+      function(){
+        let name = document.getElementById('newNameInput').value.trim();
+        if(isGenericName(name)){
+          document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
+          return false;
+        }
+        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.txt';
+        createTab({ name, isMarkdown: /\.(md|markdown)$/i.test(name) });
+      }
+    );
+  }
+  function newMarkdownTab(){
+    openModal(
+      '<h3>Nueva pestaña Markdown</h3><label>Nombre del archivo</label>' +
+      '<input type="text" id="newNameInput" placeholder="ej: borrador-ensayo.md">' +
+      '<div class="modal-error" id="newNameError"></div>' +
+      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
+      function(){
+        let name = document.getElementById('newNameInput').value.trim();
+        if(isGenericName(name)){
+          document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
+          return false;
+        }
+        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.md';
+        createTab({ name, isMarkdown: true });
+      }
+    );
+  }
+  function newWindow(){ window.open(location.href, '_blank'); }
+
+  // ============ Plantillas ============
+  const TEMPLATES = {
+    smartpost:
+      '# [Título del SmartPost]\n\n**Fecha:** \n**Fuentes:** \n\n' +
+      '## TL;DR\n\n\n## Qué pasó\n\n\n## Por qué importa\n\n\n## Dato o argumento clave\n\n\n' +
+      '## Contexto\n\n\n## The Big Picture\n\n\n## Between the Lines\n\n\n' +
+      '## Verificación del contenido\n\n\n## Actores involucrados\n\n\n' +
+      '## Narrativas en competencia\n\n\n## Riesgos y escenarios\n\n\n' +
+      '## Reality Check\n\n\n## Qué sigue\n\n\n## Bottom Line\n\n',
+    balada:
+      '# [Título de la canción]\n\n## Preludio\n\n\n## Estrofa 1\n\n\n## Estribillo\n\n\n' +
+      '## Estrofa 2\n\n\n## Puente\n\n\n## Estribillo (final)\n\n\n## Coda\n\n',
+    articulo:
+      '# [Título]\n\n## Introducción\n\n\n## Desarrollo\n\n\n## Conclusión\n\n'
+  };
+  const TEMPLATE_LABELS = {
+    smartpost: 'SmartPost (14 secciones)',
+    balada: 'Balada (Preludio–Coda)',
+    articulo: 'Artículo / Markdown básico'
+  };
+
+  function newFromTemplate(){
+    const options = Object.keys(TEMPLATES).map(k =>
+      '<option value="' + k + '">' + TEMPLATE_LABELS[k] + '</option>'
+    ).join('');
+    openModal(
+      '<h3>Nueva desde plantilla</h3>' +
+      '<label>Plantilla</label><select id="templateSelect">' + options + '</select>' +
+      '<label>Nombre del archivo</label>' +
+      '<input type="text" id="newNameInput" placeholder="ej: smartpost-borrador-junio.md">' +
+      '<div class="modal-error" id="newNameError"></div>' +
+      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
+      function(){
+        let name = document.getElementById('newNameInput').value.trim();
+        if(isGenericName(name)){
+          document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
+          return false;
+        }
+        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.md';
+        const key = document.getElementById('templateSelect').value;
+        createTab({ name, content: TEMPLATES[key], isMarkdown: true });
+      }
+    );
+  }
+
+  // ============ refresco de UI del editor ============
+  function attachEditorEvents(ta){
+    ta.addEventListener('input', refreshAll);
+    ta.addEventListener('click', updateCursorStatus);
+    ta.addEventListener('keyup', updateCursorStatus);
+    ta.addEventListener('keydown', function(e){
+      if(e.key === 'Tab'){
+        e.preventDefault();
+        const start = ta.selectionStart, end = ta.selectionEnd;
+        ta.setRangeText('    ', start, end, 'end');
+        refreshAll();
+      }
+    });
+  }
+
+  function updateCounts(){
+    const ta = activeTextarea(); if(!ta) return;
+    const text = ta.value;
+    const trimmed = text.trim();
+    const words = trimmed.length ? trimmed.split(/\s+/).length : 0;
+    statusWords.textContent = words + (words === 1 ? ' palabra' : ' palabras');
+    statusChars.textContent = text.length + (text.length === 1 ? ' carácter' : ' caracteres');
+  }
+
+  function updateCursorStatus(){
+    const ta = activeTextarea(); if(!ta) return;
+    const pos = ta.selectionStart, end = ta.selectionEnd;
+    const before = ta.value.substring(0, pos);
+    const lines = before.split('\n');
+    const line = lines.length, col = lines[lines.length - 1].length + 1;
+    let txt = 'Ln ' + line + ', Col ' + col;
+    if(end > pos) txt += '  ·  ' + (end - pos) + ' seleccionados';
+    statusLeft.textContent = txt;
+  }
+
+  function refreshAll(){
+    updateCounts(); updateCursorStatus();
+    buildTabsBar(); syncQuickSave();
+  }
+
+  // ============ Archivo ============
+  async function openFile(){
+    if(supportsFSAccess){
+      try{
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'Texto', accept: { 'text/plain': ['.txt', '.md', '.markdown'] } }]
+        });
+        const file = await handle.getFile();
+        const text = await file.text();
+        const isMd = /\.(md|markdown)$/i.test(file.name);
+        createTab({ name: file.name, content: text, handle, isMarkdown: isMd });
+        addRecent(file.name, handle);
+      }catch(err){ /* cancelado */ }
+    } else {
+      fileInput.click();
+    }
+  }
+  fileInput.addEventListener('change', async function(){
+    const file = fileInput.files[0]; if(!file) return;
+    const text = await file.text();
+    const isMd = /\.(md|markdown)$/i.test(file.name);
+    createTab({ name: file.name, content: text, isMarkdown: isMd });
+    fileInput.value = '';
+  });
+
+  function addRecent(name, handle){
+    recentFiles = recentFiles.filter(r => r.name !== name);
+    recentFiles.unshift({ name, handle });
+    if(recentFiles.length > 8) recentFiles.pop();
+  }
+
+  async function saveTab(tab){
+    if(!tab) return;
+    if(tab.handle){
+      showToast('Guardando…');
+      try{
+        const writable = await tab.handle.createWritable();
+        await writable.write(tab.ta.value);
+        await writable.close();
+        tab.originalContent = tab.ta.value;
+        refreshAll();
+        showToast('Guardado ✓');
+        syncLocationWarning();
+      }catch(err){ showToast('Error al guardar'); alert('No se pudo guardar: ' + err.message); }
+      return;
+    }
+    // Primer guardado de esta pestaña. Si el nombre sigue siendo genérico
+    // (la pestaña con la que arranca cada sesión se llama "sin-título.txt" —
+    // justo el tipo de nombre que en todo lo demás ya bloqueamos), no lo
+    // dejamos pasar: paramos aquí y exigimos un nombre real antes de escribir
+    // nada en disco.
+    if(isGenericName(tab.name)){
+      forceNameThenSave(tab);
+      return;
+    }
+    // Si hay carpeta fija, usamos el nombre que ya se le dio (o el que se
+    // acaba de exigir arriba), sin preguntar nada más — así "Guardar" nunca
+    // abre ninguna ventana cuando ya configuraste la carpeta.
+    if(saveDirHandle){
+      await saveIntoFolder(tab, tab.name);
+      return;
+    }
+    await promptSaveAs(tab);
+  }
+
+  // Pide un nombre real antes de continuar con el primer guardado de una
+  // pestaña que todavía tiene un nombre genérico (típicamente la pestaña
+  // inicial de la sesión).
+  function forceNameThenSave(tab){
+    openModal(
+      '<h3>Nombra tu nota antes de guardar</h3><label>Nombre del archivo</label>' +
+      '<input type="text" id="forceNameInput" placeholder="ej: ideas-articulo-cuba.txt">' +
+      '<div class="modal-error" id="forceNameError"></div>' +
+      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Guardar</button></div>',
+      function(){
+        let name = document.getElementById('forceNameInput').value.trim();
+        if(isGenericName(name)){
+          document.getElementById('forceNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
+          return false;
+        }
+        if(!/\.[a-zA-Z0-9]+$/.test(name)) name += /\.(md|markdown)$/i.test(tab.name) ? '.md' : '.txt';
+        tab.name = name;
+        tab.isMarkdown = /\.(md|markdown)$/i.test(name);
+        if(saveDirHandle){ saveIntoFolder(tab, name); }
+        else { promptSaveAs(tab); }
+      }
+    );
+  }
+
+  // "Guardar como" SIEMPRE pregunta el nombre — para eso existe — sea o no
+  // la primera vez que se guarda este documento.
+  async function saveTabAs(tab){
+    if(!tab) return;
+    if(saveDirHandle){
+      openModal(
+        '<h3>Guardar como</h3><label>Nombre del archivo</label>' +
+        '<input type="text" id="saveAsNameInput" value="' + tab.name.replace(/"/g,'&quot;') + '">' +
+        '<div class="modal-error" id="saveAsNameError"></div>' +
+        '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Guardar</button></div>',
+        function(){
+          let newName = document.getElementById('saveAsNameInput').value.trim();
+          if(isGenericName(newName)){
+            document.getElementById('saveAsNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
+            return false;
+          }
+          if(!/\.[a-zA-Z0-9]+$/.test(newName)) newName += /\.(md|markdown)$/i.test(tab.name) ? '.md' : '.txt';
+          saveIntoFolder(tab, newName);
+        }
+      );
+      return;
+    }
+    await promptSaveAs(tab);
+  }
+
+  // Guarda dentro de la carpeta fija configurada, bajo el nombre indicado.
+  // Separa "nombre.ext" en ["nombre", ".ext"], sin extensión devuelve ["nombre", ""].
+  function splitNameExt(name){
+    const idx = name.lastIndexOf('.');
+    if(idx <= 0) return [name, ''];
+    return [name.substring(0, idx), name.substring(idx)];
+  }
+
+  // Encuentra el primer nombre libre en la carpeta fija, probando
+  // "nombre", "nombre-1", "nombre-2"... — igual que hace YouTube con los
+  // títulos repetidos, o el Explorador de Windows con "(1)", "(2)".
+  async function findAvailableName(baseName){
+    const [stem, ext] = splitNameExt(baseName);
+    let candidate = baseName;
+    let n = 1;
+    while(true){
+      try{ await saveDirHandle.getFileHandle(candidate); }
+      catch(e){ return candidate; } // no existe: este nombre está libre
+      candidate = stem + '-' + n + ext;
+      n++;
+    }
+  }
+
+  async function saveIntoFolder(tab, name){
+    try{
+      // ¿Esto crearía una colisión? Solo aplica cuando el archivo resultante
+      // sería distinto al que esta pestaña ya tenía asociado — es decir,
+      // primer guardado con este nombre, o un nombre nuevo vía "Guardar como".
+      const isNewTarget = !tab.handle || tab.name !== name;
+      let finalName = name;
+      if(isNewTarget){
+        let exists = false;
+        try{ await saveDirHandle.getFileHandle(name); exists = true; }
+        catch(e){ exists = false; }
+        if(exists){ finalName = await findAvailableName(name); }
+      }
+      const handle = await saveDirHandle.getFileHandle(finalName, { create: true });
+      showToast('Guardando…');
+      const writable = await handle.createWritable();
+      await writable.write(tab.ta.value);
+      await writable.close();
+      tab.handle = handle;
+      tab.name = finalName;
+      tab.isMarkdown = /\.(md|markdown)$/i.test(finalName);
+      tab.originalContent = tab.ta.value;
+      addRecent(tab.name, handle);
+      refreshAll(); syncMdToolbarDisplay();
+      if(finalName !== name){
+        showToast('Ya existía "' + name + '" — guardado como "' + finalName + '" ✓');
+      } else {
+        showToast('Guardado ✓');
+      }
+      syncLocationWarning();
+    }catch(err){
+      showToast('Error al guardar');
+      alert('No se pudo guardar en la carpeta configurada: ' + err.message);
+    }
+  }
+
+  // Sin carpeta fija configurada: usa el selector nativo del navegador (o
+  // descarga el archivo si el navegador no soporta elegir carpeta).
+  async function promptSaveAs(tab){
+    if(supportsFSAccess){
+      try{
+        const handle = await window.showSaveFilePicker({
+          suggestedName: tab.name,
+          types: [
+            { description: 'Texto plano', accept: { 'text/plain': ['.txt'] } },
+            { description: 'Markdown', accept: { 'text/markdown': ['.md'] } }
+          ]
+        });
+        showToast('Guardando…');
+        const writable = await handle.createWritable();
+        await writable.write(tab.ta.value);
+        await writable.close();
+        tab.handle = handle;
+        const file = await handle.getFile();
+        tab.name = file.name;
+        tab.isMarkdown = /\.(md|markdown)$/i.test(file.name);
+        tab.originalContent = tab.ta.value;
+        addRecent(tab.name, handle);
+        refreshAll(); syncMdToolbarDisplay();
+        showToast('Guardado ✓');
+        syncLocationWarning();
+      }catch(err){ /* cancelado */ }
+    } else {
+      showToast('Guardando…');
+      const blob = new Blob([tab.ta.value], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = tab.name || 'nota.txt';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      tab.originalContent = tab.ta.value;
+      refreshAll();
+      showToast('Descargado a tu carpeta de Descargas ✓');
+    }
+  }
+
+  async function saveAllTabs(){
+    for(const tab of tabs){ if(isDirty(tab)) await saveTab(tab); }
+  }
+
+  function printActive(){
+    const ta = activeTextarea(); if(!ta) return;
+    const w = window.open('', '_blank');
+    w.document.write('<pre style="font-family:monospace;white-space:pre-wrap;padding:24px;">' + escapeHtml(ta.value) + '</pre>');
+    w.document.close(); w.focus(); w.print();
+  }
+
+  function closeWindowOrTab(){ try{ window.close(); }catch(e){} }
+
+  // ============ Edición ============
+  async function doCopy(){
+    const ta = activeTextarea(); const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+    if(!sel) return;
+    try{ await navigator.clipboard.writeText(sel); }catch(e){ document.execCommand('copy'); }
+  }
+  async function doCut(){
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end); if(!sel) return;
+    try{ await navigator.clipboard.writeText(sel); }catch(e){}
+    ta.setRangeText('', start, end, 'end'); refreshAll();
+  }
+  async function doPaste(){
+    const ta = activeTextarea();
+    let text = '';
+    try{ text = await navigator.clipboard.readText(); }
+    catch(e){ alert('No se pudo leer el portapapeles. Usa Ctrl+V directamente sobre el editor.'); return; }
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.setRangeText(text, start, end, 'end'); refreshAll();
+  }
+  function doDelete(){
+    const ta = activeTextarea(); let start = ta.selectionStart, end = ta.selectionEnd;
+    if(start === end) end = Math.min(ta.value.length, end + 1);
+    ta.setRangeText('', start, end, 'end'); refreshAll();
+  }
+  function doUndo(){ document.execCommand('undo'); refreshAll(); }
+  function clearFormatting(){
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    let text = ta.value.substring(start, end); if(!text) return;
+    text = text.replace(/^#{1,6}\s+/gm, '')
+               .replace(/\*\*([^*]+)\*\*/g, '$1')
+               .replace(/\*([^*]+)\*/g, '$1')
+               .replace(/~~([^~]+)~~/g, '$1')
+               .replace(/^[-*]\s+/gm, '')
+               .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    ta.setRangeText(text, start, end, 'end'); refreshAll();
+  }
+  function insertDateTime(){
+    const ta = activeTextarea();
+    const now = new Date().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+    const pos = ta.selectionStart;
+    ta.setRangeText(now, pos, ta.selectionEnd, 'end'); refreshAll();
+  }
+  function selectAllText(){ const ta = activeTextarea(); ta.focus(); ta.select(); }
+
+  // ----- Buscar / Reemplazar -----
+  function toggleFindBar(show){
+    findbar.classList.toggle('hidden', !show);
+    if(show){ findInput.focus(); findInput.select(); }
+    else { const ta = activeTextarea(); ta && ta.focus(); }
+  }
+  function toggleReplaceRow(show){ replaceRow.classList.toggle('hidden', !show); }
+  function searchDir(forward){
+    const ta = activeTextarea(); const term = findInput.value;
+    findInput.classList.remove('notfound'); if(!term) return;
+    const hay = ta.value.toLowerCase(); const needle = term.toLowerCase();
+    let idx;
+    if(forward){
+      idx = hay.indexOf(needle, ta.selectionEnd);
+      if(idx === -1) idx = hay.indexOf(needle, 0);
+    } else {
+      idx = hay.lastIndexOf(needle, Math.max(0, ta.selectionStart - 1));
+      if(idx === -1) idx = hay.lastIndexOf(needle);
+    }
+    if(idx === -1){ findInput.classList.add('notfound'); return; }
+    ta.focus(); ta.setSelectionRange(idx, idx + term.length); updateCursorStatus();
+    ta.classList.remove('flash');
+    void ta.offsetWidth; // fuerza reflow para poder reiniciar la animación si se repite seguido
+    ta.classList.add('flash');
+    setTimeout(() => ta.classList.remove('flash'), 500);
+  }
+  function replaceOne(){
+    const ta = activeTextarea(); const term = findInput.value; if(!term) return;
+    let sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+    // Si lo que está seleccionado ahora mismo no es ya la coincidencia
+    // (lo normal al apretar "Reemplazar" por primera vez), primero la busca.
+    if(sel.toLowerCase() !== term.toLowerCase()){
+      searchDir(true);
+      sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+    }
+    if(sel.toLowerCase() === term.toLowerCase()){
+      const start = ta.selectionStart;
+      ta.setRangeText(replaceInput.value, ta.selectionStart, ta.selectionEnd, 'end');
+      refreshAll();
+      ta.setSelectionRange(start + replaceInput.value.length, start + replaceInput.value.length);
+      searchDir(true); // deja lista la siguiente coincidencia para el próximo clic
+    } else {
+      showToast('No se encontró "' + term + '"');
+    }
+  }
+  function replaceAll(){
+    const ta = activeTextarea(); const term = findInput.value; if(!term) return;
+    const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const safeReplacement = replaceInput.value.replace(/\$/g, '$$$$'); // $ literal, no referencia de captura
+    const before = ta.value;
+    const after = before.replace(re, safeReplacement);
+    if(after === before){ showToast('No se encontró "' + term + '"'); return; }
+    ta.value = after;
+    refreshAll();
+    showToast('Reemplazado en todas las coincidencias ✓');
+  }
+
+  function gotoLine(){
+    openModal(
+      '<h3>Ir a la línea</h3><label>Número de línea</label><input type="number" id="gotoInput" min="1" value="1">' +
+      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Ir</button></div>',
+      function(){
+        const ta = activeTextarea();
+        const n = Math.max(1, parseInt(document.getElementById('gotoInput').value, 10) || 1);
+        const lines = ta.value.split('\n');
+        let pos = 0;
+        for(let i = 0; i < Math.min(n - 1, lines.length); i++) pos += lines[i].length + 1;
+        ta.focus(); ta.setSelectionRange(pos, pos); updateCursorStatus();
+      }
+    );
+  }
+
+  // ============ Menú Fuente (familia + tamaño) ============
+  const FONT_FAMILIES = {
+    cascadia: { label: 'Cascadia Code', css: '"Cascadia Code","JetBrains Mono","Fira Code",ui-monospace,Consolas,"Courier New",monospace' },
+    mono:     { label: 'Mono (JetBrains / Fira)', css: '"JetBrains Mono","Fira Code","Cascadia Code",ui-monospace,Consolas,"Courier New",monospace' },
+    consolas: { label: 'Consolas', css: 'Consolas,"Courier New",monospace' },
+    georgia:  { label: 'Georgia (serif)', css: 'Georgia,"Times New Roman",serif' },
+    inter:    { label: 'Inter (sans)', css: 'Inter,-apple-system,"Segoe UI",sans-serif' }
+  };
+  const FONT_SIZES = [12, 13, 14, 15, 16, 18, 20, 24];
+  let currentFontKey = 'cascadia';
+
+  function buildFontMenu(){
+    const curSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--editor-font-size'), 10) || 14;
+    let html = '<div class="mi-label">Familia</div>';
+    Object.keys(FONT_FAMILIES).forEach(function(key){
+      html += '<button class="mi" data-font-fam="' + key + '"><span class="check">' +
+        (key === currentFontKey ? '✓' : '') + '</span>' + FONT_FAMILIES[key].label + '</button>';
+    });
+    html += '<div class="mi-sep"></div><div class="mi-label">Tamaño</div>';
+    FONT_SIZES.forEach(function(s){
+      html += '<button class="mi" data-font-size="' + s + '"><span class="check">' +
+        (s === curSize ? '✓' : '') + '</span>' + s + ' px</button>';
+    });
+    fontMenuDropdown.innerHTML = html;
+  }
+  function setFontFamily(key){
+    currentFontKey = key;
+    document.documentElement.style.setProperty('--editor-font-family', FONT_FAMILIES[key].css);
+    buildFontMenu();
+  }
+  function setFontSize(px){
+    document.documentElement.style.setProperty('--editor-font-size', px + 'px');
+    buildFontMenu();
+  }
+  fontMenuDropdown.addEventListener('click', function(e){
+    const famBtn = e.target.closest('[data-font-fam]');
+    if(famBtn){ setFontFamily(famBtn.getAttribute('data-font-fam')); closeAllMenus(); return; }
+    const sizeBtn = e.target.closest('[data-font-size]');
+    if(sizeBtn){ setFontSize(parseInt(sizeBtn.getAttribute('data-font-size'), 10)); closeAllMenus(); }
+  });
+
+  function openModal(html, onConfirm){
+    modalBox.className = 'modal-box';
+    modalBox.innerHTML = html;
+    modalOverlay.classList.add('open');
+    function tryConfirm(){ if(onConfirm() !== false) closeModal(); }
+    const cancelBtn = modalBox.querySelector('[data-modal-cancel]');
+    const okBtn = modalBox.querySelector('[data-modal-ok]');
+    if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    if(okBtn) okBtn.addEventListener('click', tryConfirm);
+    modalBox.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && e.target.tagName !== 'SELECT' && okBtn){ e.preventDefault(); tryConfirm(); }
+    });
+    const firstInput = modalBox.querySelector('input, select');
+    if(firstInput){
+      firstInput.focus();
+      if(firstInput.tagName === 'INPUT') firstInput.select();
+    }
+  }
+  function closeModal(){ modalOverlay.classList.remove('open'); const ta = activeTextarea(); ta && ta.focus(); }
+  modalOverlay.addEventListener('click', function(e){ if(e.target === modalOverlay) closeModal(); });
+
+  function syncMdToolbarDisplay(){
+    const t = activeTab();
+    mdToolbar.classList.toggle('show', !!(t && t.isMarkdown));
+  }
+
+  function buildSchemeMenu(){
+    let html = '';
+    THEMES.forEach(function(pair){
+      const checked = document.documentElement.getAttribute('data-theme') === pair[0];
+      html += '<button class="mi" data-theme-val="' + pair[0] + '"><span class="check">' +
+        (checked ? '✓' : '') + '</span>' + pair[1] + '</button>';
+    });
+    schemeMenuDropdown.innerHTML = html;
+  }
+  function setTheme(name){
+    document.documentElement.setAttribute('data-theme', name);
+    const found = THEMES.find(p => p[0] === name);
+    statusScheme.textContent = found ? found[1] : name;
+    buildSchemeMenu();
+  }
+  schemeMenuDropdown.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-theme-val]');
+    if(btn){ setTheme(btn.getAttribute('data-theme-val')); closeAllMenus(); }
+  });
+
+  function buildRecentMenu(){
+    if(!supportsFSAccess){
+      recentSubmenu.innerHTML = '<button class="mi disabled">No disponible en este navegador</button>';
+      return;
+    }
+    if(recentFiles.length === 0){
+      recentSubmenu.innerHTML = '<button class="mi disabled">No hay archivos recientes</button>';
+      return;
+    }
+    recentSubmenu.innerHTML = '';
+    recentFiles.forEach(function(r){
+      const btn = document.createElement('button');
+      btn.className = 'mi'; btn.textContent = r.name;
+      btn.addEventListener('click', async function(){
+        try{
+          const file = await r.handle.getFile();
+          const text = await file.text();
+          const isMd = /\.(md|markdown)$/i.test(file.name);
+          createTab({ name: file.name, content: text, handle: r.handle, isMarkdown: isMd });
+        }catch(err){ alert('No se pudo reabrir el archivo (puede que ya no exista o se movió).'); }
+        closeAllMenus();
+      });
+      recentSubmenu.appendChild(btn);
+    });
+  }
+
+  // ============ Barra de formato Markdown ============
+  function wrapSelection(prefix, suffix){
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end) || 'texto';
+    ta.setRangeText(prefix + sel + suffix, start, end, 'end');
+    ta.selectionStart = start + prefix.length;
+    ta.selectionEnd = start + prefix.length + sel.length;
+    ta.focus(); refreshAll();
+  }
+  function prefixLines(prefix){
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const value = ta.value;
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    let lineEnd = value.indexOf('\n', end); if(lineEnd === -1) lineEnd = value.length;
+    const block = value.substring(lineStart, lineEnd);
+    const newBlock = block.split('\n').map(l => prefix + l).join('\n');
+    ta.setRangeText(newBlock, lineStart, lineEnd, 'end');
+    ta.focus(); refreshAll();
+  }
+  function insertLink(){
+    const url = prompt('URL del enlace:', 'https://'); if(url === null) return;
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end) || 'texto del enlace';
+    ta.setRangeText('[' + sel + '](' + url + ')', start, end, 'end');
+    ta.focus(); refreshAll();
+  }
+  function insertTable(){
+    const ta = activeTextarea(); const start = ta.selectionStart;
+    const tpl = '\n| Columna 1 | Columna 2 |\n| --- | --- |\n| celda | celda |\n';
+    ta.setRangeText(tpl, start, ta.selectionEnd, 'end');
+    ta.focus(); refreshAll();
+  }
+  document.getElementById('mdBold').addEventListener('click', () => wrapSelection('**', '**'));
+  document.getElementById('mdItalic').addEventListener('click', () => wrapSelection('*', '*'));
+  document.getElementById('mdStrike').addEventListener('click', () => wrapSelection('~~', '~~'));
+  document.getElementById('mdList').addEventListener('click', () => prefixLines('- '));
+  document.getElementById('mdLink').addEventListener('click', insertLink);
+  document.getElementById('mdTable').addEventListener('click', insertTable);
+  document.getElementById('mdClear').addEventListener('click', clearFormatting);
+  headingSelect.addEventListener('change', function(){
+    const v = headingSelect.value;
+    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const value = ta.value;
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    let lineEndIdx = value.indexOf('\n', end); if(lineEndIdx === -1) lineEndIdx = value.length;
+    let line = value.substring(lineStart, lineEndIdx).replace(/^#{1,6}\s+/, '');
+    if(v) line = '#'.repeat(parseInt(v, 10)) + ' ' + line;
+    ta.setRangeText(line, lineStart, lineEndIdx, 'end');
+    ta.focus(); refreshAll();
+    headingSelect.value = '';
+  });
+
+  // ============ Menú: apertura / cierre ============
+  const menuEls = Array.from(document.querySelectorAll('.menubar > .menu'));
+  function refreshMenuContent(menuEl){
+    if(menuEl.dataset.menu === 'file') buildRecentMenu();
+    if(menuEl.dataset.menu === 'font') buildFontMenu();
+    if(menuEl.dataset.menu === 'scheme') buildSchemeMenu();
+  }
+  menuEls.forEach(function(menuEl){
+    const btn = menuEl.querySelector('.menu-btn');
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      const willOpen = !menuEl.classList.contains('open');
+      closeAllMenus();
+      if(willOpen){
+        menuEl.classList.add('open');
+        refreshMenuContent(menuEl);
+      }
+    });
+    btn.addEventListener('mouseenter', function(){
+      if(menuEls.some(m => m.classList.contains('open')) && !menuEl.classList.contains('open')){
+        closeAllMenus(); menuEl.classList.add('open');
+        refreshMenuContent(menuEl);
+      }
+    });
+  });
+  document.querySelectorAll('.submenuwrap').forEach(function(wrap){
+    const trigger = wrap.querySelector('.mi.has-sub');
+    if(!trigger) return;
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(wrap.classList.contains('disabled')) return;
+      document.querySelectorAll('.submenuwrap').forEach(w => { if(w !== wrap) w.classList.remove('open'); });
+      wrap.classList.toggle('open');
+    });
+    trigger.addEventListener('mouseenter', function(){
+      if(wrap.classList.contains('disabled')) return;
+      document.querySelectorAll('.submenuwrap').forEach(w => { if(w !== wrap) w.classList.remove('open'); });
+      wrap.classList.add('open');
+    });
+  });
+  function closeAllMenus(){
+    menuEls.forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.submenuwrap').forEach(w => w.classList.remove('open'));
+  }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.menubar')) closeAllMenus();
+  });
+
+  // ============ despacho de acciones del menú ============
+  const ACTIONS = {
+    newTab, newWindow, newMarkdown: newMarkdownTab, newTemplate: newFromTemplate, open: openFile,
+    save: () => saveTab(activeTab()), saveAs: () => saveTabAs(activeTab()), saveAll: saveAllTabs,
+    chooseFolder: chooseSaveFolder,
+    print: printActive, closeTab: () => closeTab(activeTabId), closeWindow: closeWindowOrTab, exitApp: closeWindowOrTab,
+    undo: doUndo, cut: doCut, copy: doCopy, paste: doPaste, delete: doDelete, clearFormat: clearFormatting,
+    find: () => toggleFindBar(true), findNext: () => searchDir(true), findPrev: () => searchDir(false),
+    searchAll: searchAllNotes,
+    replace: () => { toggleFindBar(true); toggleReplaceRow(true); }, goto: gotoLine,
+    selectAll: selectAllText, dateTime: insertDateTime
+  };
+  document.querySelectorAll('.mi[data-action]').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      const action = btn.getAttribute('data-action');
+      const fn = ACTIONS[action];
+      if(fn) fn();
+      closeAllMenus();
+    });
+  });
+
+  // ============ atajos de teclado globales ============
+  window.addEventListener('keydown', function(e){
+    const ctrl = e.ctrlKey || e.metaKey;
+    const key = e.key.toLowerCase();
+    if(ctrl && key === 'n' && !e.shiftKey){ e.preventDefault(); newTab(); }
+    else if(ctrl && e.shiftKey && key === 'n'){ e.preventDefault(); newWindow(); }
+    else if(ctrl && key === 'o'){ e.preventDefault(); openFile(); }
+    else if(ctrl && key === 's' && !e.shiftKey && !e.altKey){ e.preventDefault(); saveTab(activeTab()); }
+    else if(ctrl && e.shiftKey && key === 's'){ e.preventDefault(); saveTabAs(activeTab()); }
+    else if(ctrl && e.altKey && key === 's'){ e.preventDefault(); saveAllTabs(); }
+    else if(ctrl && key === 'p'){ e.preventDefault(); printActive(); }
+    else if(ctrl && key === 'w' && !e.shiftKey){ e.preventDefault(); closeTab(activeTabId); }
+    else if(ctrl && e.shiftKey && key === 'w'){ e.preventDefault(); closeWindowOrTab(); }
+    else if(ctrl && key === 'f'){ e.preventDefault(); toggleFindBar(true); }
+    else if(key === 'f3' && !e.shiftKey){ e.preventDefault(); searchDir(true); }
+    else if(e.shiftKey && key === 'f3'){ e.preventDefault(); searchDir(false); }
+    else if(ctrl && key === 'h'){ e.preventDefault(); toggleFindBar(true); toggleReplaceRow(true); }
+    else if(ctrl && key === 'g'){ e.preventDefault(); gotoLine(); }
+    else if(key === 'f5'){ e.preventDefault(); insertDateTime(); }
+    else if(ctrl && key === 'tab'){ e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); }
+    else if(key === 'escape'){ closeAllMenus(); toggleFindBar(false); closeModal(); }
+  });
+  function cycleTab(dir){
+    if(tabs.length < 2) return;
+    const idx = tabs.findIndex(t => t.id === activeTabId);
+    const next = (idx + dir + tabs.length) % tabs.length;
+    activateTab(tabs[next].id);
+  }
+
+  findInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); searchDir(true); }
+    if(e.key === 'Escape'){ toggleFindBar(false); }
+  });
+  document.getElementById('findNextBtn').addEventListener('click', () => searchDir(true));
+  document.getElementById('findPrevBtn').addEventListener('click', () => searchDir(false));
+  document.getElementById('findCloseBtn').addEventListener('click', () => toggleFindBar(false));
+  document.getElementById('toggleReplaceBtn').addEventListener('click', () => toggleReplaceRow(replaceRow.classList.contains('hidden')));
+  document.getElementById('replaceOneBtn').addEventListener('click', replaceOne);
+  document.getElementById('replaceAllBtn').addEventListener('click', replaceAll);
+
+  window.addEventListener('beforeunload', function(e){
+    if(tabs.some(isDirty)){ e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // ============ Botón flotante de guardado rápido ============
+  quickSaveBtn.addEventListener('click', () => saveTab(activeTab()));
+  function syncQuickSave(){
+    const t = activeTab();
+    const dirty = t ? isDirty(t) : false;
+    quickSaveBtn.classList.toggle('dirty', dirty);
+    quickSaveBtn.classList.toggle('clean', !dirty);
+  }
+
+  // ============ estado inicial ============
+  document.getElementById('copyYear').textContent = new Date().getFullYear();
+  createTab({ name: 'sin-título.txt', makeActive: true });
+  syncFolderStatus();
+  restoreSaveFolder();
+})();
+</script>
+</body>
+</html>
