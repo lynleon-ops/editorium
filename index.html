@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 5.4</title>
+<title>Editorium 5.6</title>
 <style>
   :root{
     --editor-font-size:18px;
@@ -75,7 +75,9 @@
     margin-left:auto;background:transparent;border:none;color:var(--fg-text);
     padding:16px 16px;font-size:.78rem;cursor:pointer;border-radius:0;font-weight:600;
     text-transform:uppercase;letter-spacing:.04em;
+    display:inline-flex;align-items:center;gap:7px;
   }
+  .saveBtn svg{flex-shrink:0;}
   .saveBtn:hover{background:var(--border);}
   .saveBtn.dirty{background:var(--save-alert);color:#1a1a1a;}
   .saveBtn.dirty:hover{opacity:.85;}
@@ -162,16 +164,23 @@
   }
   .menu.open > .menu-dropdown{display:block;}
   .mi{
-    display:flex;justify-content:flex-start;align-items:center;gap:14px;
+    display:flex;justify-content:flex-start;align-items:center;gap:10px;
     width:100%;background:transparent;border:none;color:var(--fg-text);
     padding:7px 9px;font-size:.78rem;text-align:left;cursor:pointer;border-radius:0;
   }
-  .mi .check{width:13px;display:inline-block;color:var(--accent);}
+  .mi .check{width:13px;display:inline-block;color:var(--accent);flex-shrink:0;}
+  .mi .mi-icon{width:16px;height:16px;flex-shrink:0;opacity:.82;}
+  .mi:hover:not(.disabled) .mi-icon{opacity:1;}
+  .mi.disabled .mi-icon{opacity:.4;}
   .mi:hover:not(.disabled){background:var(--accent);color:var(--bg-main);}
   .mi:hover:not(.disabled) .check{color:var(--bg-main);}
   .mi.disabled{color:var(--fg-muted);cursor:default;}
   .mi .kbd{color:var(--fg-muted);font-size:.7rem;margin-left:auto;}
   .mi:hover:not(.disabled) .kbd{color:var(--bg-main);opacity:.75;}
+  .theme-swatch{
+    width:14px;height:14px;border-radius:3px;flex-shrink:0;
+    border:1px solid rgba(0,0,0,.2);
+  }
   .mi-sep{height:1px;background:var(--border);margin:4px 3px;}
   .submenuwrap{position:relative;}
   .submenuwrap > .menu-dropdown.submenu{top:-4px;left:100%;min-width:200px;}
@@ -394,46 +403,46 @@
     <div class="menu" data-menu="file">
       <button class="menu-btn">Archivo</button>
       <div class="menu-dropdown">
-        <button class="mi" data-action="newTab">Nueva pestaña<span class="kbd">Ctrl+N</span></button>
-        <button class="mi" data-action="newWindow">Nueva ventana<span class="kbd">Ctrl+Shift+N</span></button>
+        <button class="mi" data-action="newTab"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="18" x2="13" y2="18" stroke="#9aa3ad" stroke-width="1.3"/><circle cx="18.5" cy="18.5" r="3.6" fill="#2f9e44"/><path d="M18.5 16.8v3.4M16.8 18.5h3.4" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/></svg>Nueva pestaña<span class="kbd">Ctrl+N</span></button>
+        <button class="mi" data-action="newWindow"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><rect x="3" y="4" width="18" height="4.5" rx="1.5" fill="#2872c4"/><circle cx="6" cy="6.3" r=".8" fill="#ffffff"/><circle cx="8.2" cy="6.3" r=".8" fill="#ffffff"/></svg>Nueva ventana<span class="kbd">Ctrl+Shift+N</span></button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="open">Abrir<span class="kbd">Ctrl+O</span></button>
+        <button class="mi" data-action="open"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg>Abrir<span class="kbd">Ctrl+O</span></button>
         <div class="submenuwrap" id="recentWrap">
-          <button class="mi has-sub" data-sub="true">Reciente<span class="kbd">›</span></button>
+          <button class="mi has-sub" data-sub="true"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#eef3fb" stroke="#2872c4" stroke-width="1.4"/><path d="M12 7v5l3.5 2" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Reciente<span class="kbd">›</span></button>
           <div class="menu-dropdown submenu" id="recentSubmenu"></div>
         </div>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="save">Guardar<span class="kbd">Ctrl+S</span></button>
-        <button class="mi" data-action="saveAs">Guardar como<span class="kbd">Ctrl+Shift+S</span></button>
-        <button class="mi" data-action="saveAll">Guardar todo<span class="kbd">Ctrl+Alt+S</span></button>
-        <button class="mi" data-action="chooseFolder">Carpeta de guardado…</button>
+        <button class="mi" data-action="save"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>Guardar<span class="kbd">Ctrl+S</span></button>
+        <button class="mi" data-action="saveAs"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><circle cx="18" cy="18" r="4.6" fill="#f0883e" stroke="#ffffff" stroke-width="1"/><path d="M16.3 19.7l1-3.1 3.1 1-3.1 3.1z" fill="#ffffff"/></svg>Guardar como<span class="kbd">Ctrl+Shift+S</span></button>
+        <button class="mi" data-action="saveAll"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 6h9l4 4v9a1.4 1.4 0 0 1-1.4 1.4H6A1.4 1.4 0 0 1 4.6 19V7.4A1.4 1.4 0 0 1 6 6z" fill="#9bbbe4"/><path d="M3 3h9l4 4v9a1.4 1.4 0 0 1-1.4 1.4H3A1.4 1.4 0 0 1 1.6 16V4.4A1.4 1.4 0 0 1 3 3z" fill="#2872c4"/><rect x="5" y="12" width="9" height="6.4" fill="#ffffff"/><rect x="6.5" y="3" width="5" height="4" fill="#ffffff"/></svg>Guardar todo<span class="kbd">Ctrl+Alt+S</span></button>
+        <button class="mi" data-action="chooseFolder"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/><circle cx="17.5" cy="14.3" r="3.4" fill="#2872c4" stroke="#ffffff" stroke-width=".8"/><path d="M17.5 12.6v3.4M15.8 14.3h3.4" stroke="#ffffff" stroke-width="1" stroke-linecap="round"/></svg>Carpeta de guardado…</button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="print">Imprimir<span class="kbd">Ctrl+P</span></button>
+        <button class="mi" data-action="print"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="6" fill="#ffffff" stroke="#9aa3ad" stroke-width="1"/><rect x="3" y="8" width="18" height="9" rx="1.4" fill="#6b7280"/><rect x="6" y="13" width="12" height="8" fill="#ffffff" stroke="#9aa3ad" stroke-width="1"/><circle cx="17" cy="11" r="1" fill="#2872c4"/></svg>Imprimir<span class="kbd">Ctrl+P</span></button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="closeTab">Cerrar pestaña<span class="kbd">Ctrl+W</span></button>
-        <button class="mi" data-action="closeWindow">Cerrar ventana<span class="kbd">Ctrl+Shift+W</span></button>
-        <button class="mi" data-action="exitApp">Salir</button>
+        <button class="mi" data-action="closeTab"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#c9ccd1" stroke-width="1.2"/><path d="M14 2v4h4" fill="none" stroke="#c9ccd1" stroke-width="1.2"/><path d="M8.5 13.5l7 7M15.5 13.5l-7 7" stroke="#e5484d" stroke-width="2" stroke-linecap="round"/></svg>Cerrar pestaña<span class="kbd">Ctrl+W</span></button>
+        <button class="mi" data-action="closeWindow"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5" fill="#ffffff" stroke="#c9ccd1" stroke-width="1.2"/><rect x="3" y="4" width="18" height="4.5" rx="1.5" fill="#9aa3ad"/><path d="M9 13l6 6M15 13l-6 6" stroke="#e5484d" stroke-width="2" stroke-linecap="round"/></svg>Cerrar ventana<span class="kbd">Ctrl+Shift+W</span></button>
+        <button class="mi" data-action="exitApp"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="#9aa3ad" stroke-width="1.8" stroke-linecap="round"/><path d="M16 17l5-5-5-5" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke="#f0883e" stroke-width="2" stroke-linecap="round"/></svg>Salir</button>
       </div>
     </div>
 
     <div class="menu" data-menu="edit">
       <button class="menu-btn">Edición</button>
       <div class="menu-dropdown">
-        <button class="mi" data-action="undo">Deshacer<span class="kbd">Ctrl+Z</span></button>
-        <button class="mi" data-action="cut">Cortar<span class="kbd">Ctrl+X</span></button>
-        <button class="mi" data-action="copy">Copiar<span class="kbd">Ctrl+C</span></button>
-        <button class="mi" data-action="paste">Pegar<span class="kbd">Ctrl+V</span></button>
-        <button class="mi" data-action="delete">Eliminar<span class="kbd">Supr</span></button>
+        <button class="mi" data-action="undo"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round"/><path d="M9 14l-5-5 5-5" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Deshacer<span class="kbd">Ctrl+Z</span></button>
+        <button class="mi" data-action="cut"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" fill="#f0883e"/><circle cx="6" cy="18" r="3" fill="#2872c4"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12" stroke="#9aa3ad" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Cortar<span class="kbd">Ctrl+X</span></button>
+        <button class="mi" data-action="copy"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 2h6l3 3v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#cdddf3" stroke="#2872c4" stroke-width="1"/><path d="M9 9h9l3 3v8a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.2"/></svg>Copiar<span class="kbd">Ctrl+C</span></button>
+        <button class="mi" data-action="paste"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="19" rx="1.5" fill="#e9c46a"/><rect x="7" y="6" width="10" height="14" fill="#ffffff"/><rect x="8.5" y="1.5" width="7" height="3.6" rx="1" fill="#9aa3ad"/><line x1="9" y1="10" x2="15" y2="10" stroke="#9aa3ad" stroke-width="1.1"/><line x1="9" y1="13" x2="15" y2="13" stroke="#9aa3ad" stroke-width="1.1"/><line x1="9" y1="16" x2="13" y2="16" stroke="#9aa3ad" stroke-width="1.1"/></svg>Pegar<span class="kbd">Ctrl+V</span></button>
+        <button class="mi" data-action="delete"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" fill="none" stroke="#9aa3ad" stroke-width="1.4"/><path d="M4 6h16l-1.2 14.2A2 2 0 0 1 16.8 22H7.2a2 2 0 0 1-2-1.8z" fill="#e5484d"/><line x1="3" y1="6" x2="21" y2="6" stroke="#9aa3ad" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="10" x2="10" y2="17" stroke="#ffffff" stroke-width="1.1"/><line x1="14" y1="10" x2="14" y2="17" stroke="#ffffff" stroke-width="1.1"/></svg>Eliminar<span class="kbd">Supr</span></button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="find">Buscar<span class="kbd">Ctrl+F</span></button>
-        <button class="mi" data-action="findNext">Buscar siguiente<span class="kbd">F3</span></button>
-        <button class="mi" data-action="findPrev">Buscar anterior<span class="kbd">Shift+F3</span></button>
-        <button class="mi" data-action="searchAll">Buscar en todas las notas…</button>
-        <button class="mi" data-action="replace">Reemplazar<span class="kbd">Ctrl+H</span></button>
-        <button class="mi" data-action="goto">Ir a<span class="kbd">Ctrl+G</span></button>
+        <button class="mi" data-action="find"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar<span class="kbd">Ctrl+F</span></button>
+        <button class="mi" data-action="findNext"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar siguiente<span class="kbd">F3</span></button>
+        <button class="mi" data-action="findPrev"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar anterior<span class="kbd">Shift+F3</span></button>
+        <button class="mi" data-action="searchAll"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M2.6 8.3a1.2 1.2 0 0 1 1.2-1.3h4l1.4 1.6h7a1.2 1.2 0 0 1 1.2 1.2v6.2a1.2 1.2 0 0 1-1.2 1.2H3.8a1.2 1.2 0 0 1-1.2-1.2z" fill="#f0b429"/><circle cx="15.5" cy="14.5" r="5" fill="#eef3fb" stroke="#2872c4" stroke-width="1.8"/><line x1="19.2" y1="18.2" x2="22.5" y2="21.5" stroke="#2872c4" stroke-width="2" stroke-linecap="round"/></svg>Buscar en todas las notas…</button>
+        <button class="mi" data-action="replace"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 11V9a4 4 0 0 1 4-4h14" fill="none" stroke="#2872c4" stroke-width="2" stroke-linecap="round"/><polyline points="17 1 21 5 17 9" fill="none" stroke="#2872c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 13v2a4 4 0 0 1-4 4H3" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round"/><polyline points="7 23 3 19 7 15" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reemplazar<span class="kbd">Ctrl+H</span></button>
+        <button class="mi" data-action="goto"><svg class="mi-icon" viewBox="0 0 24 24"><line x1="4" y1="12" x2="18" y2="12" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round"/><polyline points="13 6 19 12 13 18" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ir a<span class="kbd">Ctrl+G</span></button>
         <div class="mi-sep"></div>
-        <button class="mi" data-action="selectAll">Seleccionar todo<span class="kbd">Ctrl+A</span></button>
-        <button class="mi" data-action="dateTime">Fecha y hora<span class="kbd">F5</span></button>
+        <button class="mi" data-action="selectAll"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-dasharray="3 2.4"/><circle cx="3.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="3.5" cy="20.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="20.5" r="1.6" fill="#2872c4"/></svg>Seleccionar todo<span class="kbd">Ctrl+A</span></button>
+        <button class="mi" data-action="dateTime"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="1.5" fill="#ffffff" stroke="#c9ccd1" stroke-width="1"/><rect x="3" y="4" width="18" height="5" rx="1.5" fill="#e5484d"/><rect x="7" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="15.2" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="12" width="3.4" height="3" fill="#2872c4"/><rect x="14.6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="6" y="16" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="16" width="3.4" height="3" fill="#cdddf3"/></svg>Fecha y hora<span class="kbd">F5</span></button>
       </div>
     </div>
 
@@ -447,7 +456,10 @@
       <div class="menu-dropdown dd-right" id="schemeMenuDropdown"></div>
     </div>
 
-    <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)">Guardar</button>
+    <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>
+      Guardar
+    </button>
   </nav>
 
   <main class="workspace">
@@ -509,7 +521,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V5.4.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V5.6.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -553,6 +565,7 @@
   const notesPanelSearchBtn = document.getElementById('notesPanelSearchBtn');
 
   const TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+  const DOC_ICON_SVG = '<svg class="mi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
 
   const supportsFSAccess = 'showOpenFilePicker' in window;
   const THEMES = [
@@ -560,6 +573,17 @@
     ['solarized-dark','Solarized Dark'], ['solarized-light','Solarized Light'],
     ['nord','Nord'], ['gruvbox','Gruvbox Dark'], ['github-light','GitHub Light']
   ];
+  // Colores de vista previa para el swatch de cada tema en el menú Color
+  // (deben coincidir con --bg-main/--accent de cada bloque html[data-theme=...] del CSS).
+  const THEME_SWATCH = {
+    'monokai': ['#272822', '#a6e22e'],
+    'dracula': ['#282a36', '#bd93f9'],
+    'solarized-dark': ['#002b36', '#2aa198'],
+    'solarized-light': ['#fdf6e3', '#268bd2'],
+    'nord': ['#2e3440', '#88c0d0'],
+    'gruvbox': ['#282828', '#fe8019'],
+    'github-light': ['#ffffff', '#0969da']
+  };
 
   let tabs = [];        // {id, name, handle, ta, originalContent}
   let activeTabId = null;
@@ -1414,7 +1438,8 @@
     let html = '<div class="mi-label">Familia</div>';
     Object.keys(FONT_FAMILIES).forEach(function(key){
       html += '<button class="mi" data-font-fam="' + key + '"><span class="check">' +
-        (key === currentFontKey ? '✓' : '') + '</span>' + FONT_FAMILIES[key].label + '</button>';
+        (key === currentFontKey ? '✓' : '') + '</span><span style="font-family:' +
+        FONT_FAMILIES[key].css.replace(/"/g,'&quot;') + ';">' + FONT_FAMILIES[key].label + '</span></button>';
     });
     html += '<div class="mi-sep"></div><div class="mi-label">Tamaño</div>';
     FONT_SIZES.forEach(function(s){
@@ -1475,8 +1500,10 @@
     let html = '';
     THEMES.forEach(function(pair){
       const checked = document.documentElement.getAttribute('data-theme') === pair[0];
+      const sw = THEME_SWATCH[pair[0]] || ['#888888', '#888888'];
       html += '<button class="mi" data-theme-val="' + pair[0] + '"><span class="check">' +
-        (checked ? '✓' : '') + '</span>' + pair[1] + '</button>';
+        (checked ? '✓' : '') + '</span><span class="theme-swatch" style="background:linear-gradient(135deg,' +
+        sw[0] + ' 50%,' + sw[1] + ' 50%);"></span>' + pair[1] + '</button>';
     });
     schemeMenuDropdown.innerHTML = html;
   }
@@ -1503,7 +1530,8 @@
     recentSubmenu.innerHTML = '';
     recentFiles.forEach(function(r){
       const btn = document.createElement('button');
-      btn.className = 'mi'; btn.textContent = r.name;
+      btn.className = 'mi';
+      btn.innerHTML = DOC_ICON_SVG + '<span>' + escapeHtml(r.name) + '</span>';
       btn.addEventListener('click', async function(){
         try{
           const file = await r.handle.getFile();
