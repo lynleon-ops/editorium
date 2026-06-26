@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 5.2</title>
+<title>Editorium 5.3</title>
 <style>
   :root{
     --editor-font-size:14px;
@@ -260,7 +260,18 @@
 
   /* ---------- Área de edición (ancho fijo de ~1100px) ---------- */
   .workspace{flex:1;display:flex;min-height:0;}
-  .editorstack{flex:1;min-width:0;}
+  .editorstack{flex:1;min-width:0;position:relative;}
+  .editorEmpty{
+    display:none;height:100%;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;color:var(--fg-muted);text-align:center;padding:40px;
+  }
+  .editorEmpty.show{display:flex;}
+  .editorEmpty-icon{opacity:.45;}
+  .editorEmpty p{margin:0;font-size:.88rem;}
+  .editorEmpty button{
+    background:var(--accent);color:var(--bg-main);border:none;border-radius:8px;
+    padding:8px 18px;font-size:.82rem;cursor:pointer;font-weight:600;
+  }
   textarea.editor{
     display:none;
     width:1100px;max-width:100%;height:100%;margin:0 auto;
@@ -459,7 +470,15 @@
         <div id="notesPanelList"></div>
       </div>
     </aside>
-    <div class="editorstack" id="editorstack"></div>
+    <div class="editorstack" id="editorstack">
+      <div class="editorEmpty" id="editorEmpty">
+        <div class="editorEmpty-icon">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        </div>
+        <p>No tienes ninguna nota abierta.</p>
+        <button type="button" id="editorEmptyNewBtn">Crear nueva nota</button>
+      </div>
+    </div>
   </main>
 
   <div class="findbar hidden" id="findbar">
@@ -490,7 +509,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V5.2.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V5.3.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -504,6 +523,7 @@
 (function(){
   const tabsbar = document.getElementById('tabsbar');
   const editorstack = document.getElementById('editorstack');
+  const editorEmpty = document.getElementById('editorEmpty');
   const fileInput = document.getElementById('fileInput');
   const findbar = document.getElementById('findbar');
   const findInput = document.getElementById('findInput');
@@ -946,7 +966,8 @@
     tab.ta.remove();
     tabs.splice(idx, 1);
     if(tabs.length === 0){
-      createTab({ name: 'sin-título.txt' });
+      activeTabId = null;
+      refreshAll();
       return;
     }
     if(activeTabId === id){
@@ -967,14 +988,23 @@
       '<input type="text" id="newNameInput" placeholder="ej: ideas-articulo-cuba.txt">' +
       '<div class="modal-error" id="newNameError"></div>' +
       '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Crear</button></div>',
-      function(){
+      async function(){
         let name = document.getElementById('newNameInput').value.trim();
         if(isGenericName(name)){
           document.getElementById('newNameError').textContent = 'Escribe un nombre específico para tu nota — "nota" no vale.';
           return false;
         }
         if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.txt';
+        if(saveDirHandle){
+          let exists = false;
+          try{ await saveDirHandle.getFileHandle(name); exists = true; }catch(e){ exists = false; }
+          if(exists){
+            document.getElementById('newNameError').textContent = 'Ya existe una nota con este nombre.';
+            return false;
+          }
+        }
         createTab({ name });
+        return true;
       }
     );
   }
@@ -1020,6 +1050,7 @@
   function refreshAll(){
     updateCounts(); updateCursorStatus();
     buildTabsBar(); syncQuickSave();
+    editorEmpty.classList.toggle('show', tabs.length === 0);
   }
 
   // ============ Archivo ============
@@ -1067,49 +1098,62 @@
       return;
     }
     // Primer guardado de esta pestaña. Si el nombre sigue siendo genérico
-    // (la pestaña con la que arranca cada sesión se llama "sin-título.txt" —
-    // justo el tipo de nombre que en todo lo demás ya bloqueamos), no lo
-    // dejamos pasar: paramos aquí y exigimos un nombre real antes de escribir
-    // nada en disco.
+    // no lo dejamos pasar: paramos aquí y exigimos un nombre real antes de
+    // escribir nada en disco.
     if(isGenericName(tab.name)){
       forceNameThenSave(tab);
       return;
     }
     // Si hay carpeta fija, usamos el nombre que ya se le dio (o el que se
-    // acaba de exigir arriba), sin preguntar nada más — así "Guardar" nunca
-    // abre ninguna ventana cuando ya configuraste la carpeta.
+    // acaba de exigir arriba). Si ya existe una nota con ese nombre en la
+    // carpeta, NUNCA se sobrescribe ni se renombra solo: se exige un nombre
+    // distinto antes de guardar nada.
     if(saveDirHandle){
-      await saveIntoFolder(tab, tab.name);
+      const result = await saveIntoFolder(tab, tab.name);
+      if(result === 'duplicate'){
+        forceNameThenSave(tab, 'Ya existe una nota con este nombre.');
+      }
       return;
     }
     await promptSaveAs(tab);
   }
 
   // Pide un nombre real antes de continuar con el primer guardado de una
-  // pestaña que todavía tiene un nombre genérico (típicamente la pestaña
-  // inicial de la sesión).
-  function forceNameThenSave(tab){
+  // pestaña que todavía tiene un nombre genérico (típicamente una pestaña
+  // recién creada), o para reintentar tras chocar con un nombre ya existente.
+  function forceNameThenSave(tab, initialError){
+    const prefill = isGenericName(tab.name) ? '' : tab.name.replace(/"/g,'&quot;');
     openModal(
       '<h3>Nombra tu nota antes de guardar</h3><label>Nombre del archivo</label>' +
-      '<input type="text" id="forceNameInput" placeholder="ej: ideas-articulo-cuba.txt">' +
-      '<div class="modal-error" id="forceNameError"></div>' +
+      '<input type="text" id="forceNameInput" placeholder="ej: ideas-articulo-cuba.txt" value="' + prefill + '">' +
+      '<div class="modal-error" id="forceNameError">' + (initialError || '') + '</div>' +
       '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Guardar</button></div>',
-      function(){
+      async function(){
         let name = document.getElementById('forceNameInput').value.trim();
         if(isGenericName(name)){
           document.getElementById('forceNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
           return false;
         }
         if(!/\.[a-zA-Z0-9]+$/.test(name)) name += '.txt';
-        tab.name = name;
-        if(saveDirHandle){ saveIntoFolder(tab, name); }
-        else { promptSaveAs(tab); }
+        if(saveDirHandle){
+          const result = await saveIntoFolder(tab, name);
+          if(result === 'duplicate'){
+            document.getElementById('forceNameError').textContent = 'Ya existe una nota con este nombre.';
+            return false;
+          }
+          return true;
+        } else {
+          tab.name = name;
+          promptSaveAs(tab);
+          return true;
+        }
       }
     );
   }
 
   // "Guardar como" SIEMPRE pregunta el nombre — para eso existe — sea o no
-  // la primera vez que se guarda este documento.
+  // la primera vez que se guarda este documento. Si el nombre elegido ya
+  // existe en la carpeta, se bloquea con un error y nunca se sobrescribe.
   async function saveTabAs(tab){
     if(!tab) return;
     if(saveDirHandle){
@@ -1118,14 +1162,19 @@
         '<input type="text" id="saveAsNameInput" value="' + tab.name.replace(/"/g,'&quot;') + '">' +
         '<div class="modal-error" id="saveAsNameError"></div>' +
         '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Guardar</button></div>',
-        function(){
+        async function(){
           let newName = document.getElementById('saveAsNameInput').value.trim();
           if(isGenericName(newName)){
             document.getElementById('saveAsNameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
             return false;
           }
           if(!/\.[a-zA-Z0-9]+$/.test(newName)) newName += '.txt';
-          saveIntoFolder(tab, newName);
+          const result = await saveIntoFolder(tab, newName);
+          if(result === 'duplicate'){
+            document.getElementById('saveAsNameError').textContent = 'Ya existe una nota con este nombre.';
+            return false;
+          }
+          return true;
         }
       );
       return;
@@ -1134,61 +1183,39 @@
   }
 
   // Guarda dentro de la carpeta fija configurada, bajo el nombre indicado.
-  // Separa "nombre.ext" en ["nombre", ".ext"], sin extensión devuelve ["nombre", ""].
-  function splitNameExt(name){
-    const idx = name.lastIndexOf('.');
-    if(idx <= 0) return [name, ''];
-    return [name.substring(0, idx), name.substring(idx)];
-  }
-
-  // Encuentra el primer nombre libre en la carpeta fija, probando
-  // "nombre", "nombre-1", "nombre-2"... — igual que hace YouTube con los
-  // títulos repetidos, o el Explorador de Windows con "(1)", "(2)".
-  async function findAvailableName(baseName){
-    const [stem, ext] = splitNameExt(baseName);
-    let candidate = baseName;
-    let n = 1;
-    while(true){
-      try{ await saveDirHandle.getFileHandle(candidate); }
-      catch(e){ return candidate; } // no existe: este nombre está libre
-      candidate = stem + '-' + n + ext;
-      n++;
-    }
-  }
-
+  // Si el nombre ya está en uso por OTRO archivo, nunca sobrescribe ni
+  // renombra solo: devuelve 'duplicate' para que quien llamó pida otro nombre.
   async function saveIntoFolder(tab, name){
     try{
-      // ¿Esto crearía una colisión? Solo aplica cuando el archivo resultante
-      // sería distinto al que esta pestaña ya tenía asociado — es decir,
-      // primer guardado con este nombre, o un nombre nuevo vía "Guardar como".
+      // ¿Esto apunta a un archivo distinto al que esta pestaña ya tenía
+      // asociado? — es decir, primer guardado con este nombre, o un nombre
+      // nuevo vía "Guardar como". Solo en ese caso hace falta comprobar
+      // colisión; sobrescribir el propio archivo de la pestaña sí es válido.
       const isNewTarget = !tab.handle || tab.name !== name;
-      let finalName = name;
       if(isNewTarget){
         let exists = false;
         try{ await saveDirHandle.getFileHandle(name); exists = true; }
         catch(e){ exists = false; }
-        if(exists){ finalName = await findAvailableName(name); }
+        if(exists) return 'duplicate';
       }
-      const handle = await saveDirHandle.getFileHandle(finalName, { create: true });
+      const handle = await saveDirHandle.getFileHandle(name, { create: true });
       showToast('Guardando…');
       const writable = await handle.createWritable();
       await writable.write(tab.ta.value);
       await writable.close();
       tab.handle = handle;
-      tab.name = finalName;
+      tab.name = name;
       tab.originalContent = tab.ta.value;
       addRecent(tab.name, handle);
       refreshAll();
-      if(finalName !== name){
-        showToast('Ya existía "' + name + '" — guardado como "' + finalName + '" ✓');
-      } else {
-        showToast('Guardado ✓');
-      }
+      showToast('Guardado ✓');
       syncLocationWarning();
       if(notesPanelOpen) refreshNotesPanel();
+      return 'ok';
     }catch(err){
       showToast('Error al guardar');
       alert('No se pudo guardar en la carpeta configurada: ' + err.message);
+      return 'error';
     }
   }
 
@@ -1246,20 +1273,22 @@
 
   // ============ Edición ============
   async function doCopy(){
-    const ta = activeTextarea(); const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+    const ta = activeTextarea(); if(!ta) return;
+    const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
     if(!sel) return;
     try{ await navigator.clipboard.writeText(sel); }catch(e){ document.execCommand('copy'); }
   }
   async function doCut(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea(); const start = ta.selectionStart, end = ta.selectionEnd;
+    const ta = activeTextarea(); if(!ta) return;
+    const start = ta.selectionStart, end = ta.selectionEnd;
     const sel = ta.value.substring(start, end); if(!sel) return;
     try{ await navigator.clipboard.writeText(sel); }catch(e){}
     ta.setRangeText('', start, end, 'end'); refreshAll();
   }
   async function doPaste(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea();
+    const ta = activeTextarea(); if(!ta) return;
     let text = '';
     try{ text = await navigator.clipboard.readText(); }
     catch(e){ alert('No se pudo leer el portapapeles. Usa Ctrl+V directamente sobre el editor.'); return; }
@@ -1268,32 +1297,36 @@
   }
   function doDelete(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea(); let start = ta.selectionStart, end = ta.selectionEnd;
+    const ta = activeTextarea(); if(!ta) return;
+    let start = ta.selectionStart, end = ta.selectionEnd;
     if(start === end) end = Math.min(ta.value.length, end + 1);
     ta.setRangeText('', start, end, 'end'); refreshAll();
   }
   function doUndo(){
     if(isLocked()) return;
+    if(!activeTextarea()) return;
     document.execCommand('undo'); refreshAll();
   }
   function insertDateTime(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea();
+    const ta = activeTextarea(); if(!ta) return;
     const now = new Date().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
     const pos = ta.selectionStart;
     ta.setRangeText(now, pos, ta.selectionEnd, 'end'); refreshAll();
   }
-  function selectAllText(){ const ta = activeTextarea(); ta.focus(); ta.select(); }
+  function selectAllText(){ const ta = activeTextarea(); if(!ta) return; ta.focus(); ta.select(); }
 
   // ----- Buscar / Reemplazar -----
   function toggleFindBar(show){
+    if(show && !activeTextarea()) return;
     findbar.classList.toggle('hidden', !show);
     if(show){ findInput.focus(); findInput.select(); }
     else { const ta = activeTextarea(); ta && ta.focus(); }
   }
   function toggleReplaceRow(show){ replaceRow.classList.toggle('hidden', !show); }
   function searchDir(forward){
-    const ta = activeTextarea(); const term = findInput.value;
+    const ta = activeTextarea(); if(!ta) return;
+    const term = findInput.value;
     findInput.classList.remove('notfound'); if(!term) return;
     const hay = ta.value.toLowerCase(); const needle = term.toLowerCase();
     let idx;
@@ -1313,7 +1346,8 @@
   }
   function replaceOne(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea(); const term = findInput.value; if(!term) return;
+    const ta = activeTextarea(); if(!ta) return;
+    const term = findInput.value; if(!term) return;
     let sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
     // Si lo que está seleccionado ahora mismo no es ya la coincidencia
     // (lo normal al apretar "Reemplazar" por primera vez), primero la busca.
@@ -1334,7 +1368,8 @@
   }
   function replaceAll(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
-    const ta = activeTextarea(); const term = findInput.value; if(!term) return;
+    const ta = activeTextarea(); if(!ta) return;
+    const term = findInput.value; if(!term) return;
     const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     const safeReplacement = replaceInput.value.replace(/\$/g, '$$$$'); // $ literal, no referencia de captura
     const before = ta.value;
@@ -1348,11 +1383,12 @@
   }
 
   function gotoLine(){
+    if(!activeTextarea()) return;
     openModal(
       '<h3>Ir a la línea</h3><label>Número de línea</label><input type="number" id="gotoInput" min="1" value="1">' +
       '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Ir</button></div>',
       function(){
-        const ta = activeTextarea();
+        const ta = activeTextarea(); if(!ta) return;
         const n = Math.max(1, parseInt(document.getElementById('gotoInput').value, 10) || 1);
         const lines = ta.value.split('\n');
         let pos = 0;
@@ -1407,7 +1443,18 @@
     modalBox.className = 'modal-box';
     modalBox.innerHTML = html;
     modalOverlay.classList.add('open');
-    function tryConfirm(){ if(onConfirm() !== false) closeModal(); }
+    function tryConfirm(){
+      const result = onConfirm();
+      if(result && typeof result.then === 'function'){
+        if(okBtn) okBtn.disabled = true;
+        result.then(function(r){
+          if(okBtn) okBtn.disabled = false;
+          if(r !== false) closeModal();
+        }).catch(function(){ if(okBtn) okBtn.disabled = false; });
+      } else if(result !== false){
+        closeModal();
+      }
+    }
     const cancelBtn = modalBox.querySelector('[data-modal-cancel]');
     const okBtn = modalBox.querySelector('[data-modal-ok]');
     if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
@@ -1593,7 +1640,8 @@
 
   // ============ estado inicial ============
   document.getElementById('copyYear').textContent = new Date().getFullYear();
-  createTab({ name: 'sin-título.txt', makeActive: true });
+  document.getElementById('editorEmptyNewBtn').addEventListener('click', newTab);
+  refreshAll();
   syncFolderStatus();
   restoreSaveFolder();
 })();
