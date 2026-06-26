@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 5.0</title>
+<title>Editorium 5.2</title>
 <style>
   :root{
     --editor-font-size:14px;
@@ -213,6 +213,15 @@
   }
   .notesPanel-searchBtn:hover{color:var(--accent);background:rgba(127,127,127,.12);}
 
+  .notesPanel-sortRow{display:flex;gap:6px;margin-bottom:10px;}
+  .notesPanel-sortBtn{
+    flex:1;background:transparent;border:1px solid var(--border);border-radius:8px;
+    color:var(--fg-muted);font-size:.66rem;padding:4px 6px;cursor:pointer;
+    text-transform:uppercase;letter-spacing:.03em;font-weight:600;
+  }
+  .notesPanel-sortBtn:hover{border-color:var(--accent);color:var(--fg-text);}
+  .notesPanel-sortBtn.active{background:var(--accent);border-color:var(--accent);color:var(--bg-main);}
+
   .notesPanel-card{
     background:var(--bg-main);border:1px solid var(--border);border-radius:10px;
     padding:10px 12px;margin-bottom:8px;cursor:pointer;
@@ -225,7 +234,7 @@
     font-size:.82rem;font-weight:600;color:var(--fg-text);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .notesPanel-cardSub{font-size:.7rem;color:var(--fg-muted);margin-top:3px;}
+  .notesPanel-cardSub{font-size:.62rem;color:var(--fg-muted);margin-top:3px;letter-spacing:.02em;}
   .notesPanel-trashBtn{
     background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
     padding:3px;flex-shrink:0;border-radius:4px;line-height:0;
@@ -443,6 +452,10 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </button>
         </div>
+        <div class="notesPanel-sortRow" id="notesPanelSortRow">
+          <button type="button" class="notesPanel-sortBtn active" data-sort="date">Fecha</button>
+          <button type="button" class="notesPanel-sortBtn" data-sort="alpha">A-Z</button>
+        </div>
         <div id="notesPanelList"></div>
       </div>
     </aside>
@@ -477,7 +490,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V5.0.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V5.2.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -677,6 +690,8 @@
 
   // ============ Panel de todas mis notas ============
   let notesPanelOpen = false;
+  let notesSortMode = 'date'; // 'date' (más reciente primero) o 'alpha' (A-Z)
+  const notesPanelSortRow = document.getElementById('notesPanelSortRow');
 
   function toggleNotesPanel(){
     notesPanelOpen = !notesPanelOpen;
@@ -687,20 +702,19 @@
   panelToggleBtn.addEventListener('click', toggleNotesPanel);
   notesPanelNewBtn.addEventListener('click', newTab);
   notesPanelSearchBtn.addEventListener('click', searchAllNotes);
+  notesPanelSortRow.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-sort]');
+    if(!btn) return;
+    notesSortMode = btn.getAttribute('data-sort');
+    notesPanelSortRow.querySelectorAll('.notesPanel-sortBtn').forEach(b => b.classList.toggle('active', b === btn));
+    refreshNotesPanel();
+  });
 
-  function relativeTimeEs(ts){
-    if(!ts) return '';
-    const sec = Math.floor((Date.now() - ts) / 1000);
-    if(sec < 45) return 'Actualizado justo ahora';
-    const min = Math.floor(sec / 60);
-    if(min < 60) return 'Actualizado hace ' + min + (min === 1 ? ' minuto' : ' minutos');
-    const hr = Math.floor(min / 60);
-    if(hr < 24) return 'Actualizado hace ' + hr + (hr === 1 ? ' hora' : ' horas');
-    const day = Math.floor(hr / 24);
-    if(day === 1) return 'Actualizado ayer';
-    if(day < 7) return 'Actualizado hace ' + day + ' días';
+  const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function formatLastEdited(ts){
+    if(!ts) return 'Last Edition: —';
     const d = new Date(ts);
-    return 'Actualizado el ' + d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return 'Last Edition: ' + d.getDate() + ' ' + MONTHS_EN[d.getMonth()] + ' ' + d.getFullYear();
   }
 
   async function refreshNotesPanel(){
@@ -722,7 +736,11 @@
         items.push({ name, handle, lastModified });
       }
     }catch(e){ /* la carpeta pudo cambiar de permisos */ }
-    items.sort((a, b) => b.lastModified - a.lastModified);
+    if(notesSortMode === 'alpha'){
+      items.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    } else {
+      items.sort((a, b) => b.lastModified - a.lastModified);
+    }
     if(items.length === 0){
       notesPanelList.innerHTML = '<div class="notesPanel-empty">Esta carpeta todavía no tiene notas guardadas.</div>';
       return;
@@ -738,7 +756,7 @@
           '<span class="notesPanel-cardTitle">' + escapeHtml(item.name) + '</span>' +
           '<button type="button" class="notesPanel-trashBtn" title="Eliminar nota">' + TRASH_ICON_SVG + '</button>' +
         '</div>' +
-        '<div class="notesPanel-cardSub">' + relativeTimeEs(item.lastModified) + '</div>';
+        '<div class="notesPanel-cardSub">' + formatLastEdited(item.lastModified) + '</div>';
       card.addEventListener('click', async function(){
         const existing = tabs.find(t => t.name === item.name && t.handle);
         if(existing){ activateTab(existing.id); return; }
