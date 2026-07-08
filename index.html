@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 5.9</title>
+<title>Editorium 6.1</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
     --editor-font-size:18px;
@@ -321,6 +322,89 @@
   textarea.editor.flash{animation:searchFlash .5s ease-out;}
   textarea.editor::placeholder{color:var(--fg-muted);}
 
+  /* ---------- Wrapper por pestaña (agrupa toolbar + editor/preview) ---------- */
+  .tab-wrapper{
+    display:none;flex-direction:column;width:100%;height:100%;position:relative;
+  }
+  .tab-wrapper.active{ display:flex; }
+
+  /* ---------- Barra de herramientas Markdown ---------- */
+  .md-toolbar{
+    display:flex;align-items:center;gap:2px;flex-shrink:0;
+    background:var(--bg-toolbar);border-bottom:1px solid var(--border);padding:4px 8px;
+    flex-wrap:wrap;
+  }
+  .md-toolbar button{
+    background:transparent;border:1px solid transparent;color:var(--fg-text);
+    font-size:.78rem;padding:3px 7px;cursor:pointer;border-radius:4px;
+    font-family:var(--editor-font-family);line-height:1.2;
+  }
+  .md-toolbar button:hover{ background:var(--border);border-color:var(--border); }
+  .md-toolbar button.active-mode{ background:var(--accent);color:var(--bg-main);border-color:var(--accent); }
+  .md-toolbar-sep{ width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0; }
+
+  /* ---------- Pane de preview Markdown ---------- */
+  .preview-pane{
+    display:none;width:1100px;max-width:100%;height:100%;margin:0 auto;
+    padding:24px 32px;overflow-y:auto;background:var(--bg-main);color:var(--fg-text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    font-size:16px;line-height:1.75;
+  }
+  .preview-pane::-webkit-scrollbar{width:11px;}
+  .preview-pane::-webkit-scrollbar-thumb{background:var(--border);}
+  .preview-pane::-webkit-scrollbar-track{background:var(--bg-main);}
+  .preview-pane.active{ display:block; }
+
+  /* Tipografía del preview */
+  .preview-pane h1{font-size:2rem;font-weight:700;margin:0 0 .6em;border-bottom:2px solid var(--border);padding-bottom:.3em;color:var(--fg-text);}
+  .preview-pane h2{font-size:1.5rem;font-weight:700;margin:1.4em 0 .5em;border-bottom:1px solid var(--border);padding-bottom:.25em;color:var(--fg-text);}
+  .preview-pane h3{font-size:1.2rem;font-weight:700;margin:1.2em 0 .4em;color:var(--fg-text);}
+  .preview-pane h4,h5,h6{font-weight:700;margin:1em 0 .4em;color:var(--fg-text);}
+  .preview-pane p{margin:0 0 1em;}
+  .preview-pane strong{font-weight:700;}
+  .preview-pane em{font-style:italic;}
+  .preview-pane del{text-decoration:line-through;opacity:.7;}
+  .preview-pane a{color:var(--accent);text-decoration:underline;}
+  .preview-pane blockquote{
+    margin:1em 0;padding:.6em 1em;
+    border-left:4px solid var(--accent);
+    background:var(--bg-gutter);color:var(--fg-muted);font-style:italic;
+  }
+  .preview-pane code{
+    background:var(--bg-gutter);color:var(--accent2);
+    font-family:var(--editor-font-family);font-size:.88em;
+    padding:.15em .4em;border-radius:3px;
+  }
+  .preview-pane pre{
+    background:var(--bg-gutter);border:1px solid var(--border);
+    padding:1em;border-radius:4px;overflow-x:auto;margin:1em 0;
+  }
+  .preview-pane pre code{background:none;padding:0;font-size:.9em;color:var(--fg-text);}
+  .preview-pane ul,.preview-pane ol{margin:.5em 0 1em 1.5em;padding:0;}
+  .preview-pane li{margin:.25em 0;}
+  .preview-pane hr{border:none;border-top:2px solid var(--border);margin:1.5em 0;}
+  .preview-pane table{border-collapse:collapse;width:100%;margin:1em 0;}
+  .preview-pane th,.preview-pane td{border:1px solid var(--border);padding:.5em .8em;text-align:left;}
+  .preview-pane th{background:var(--bg-gutter);font-weight:700;}
+  .preview-pane img{max-width:100%;height:auto;border-radius:4px;display:block;margin:.5em 0;}
+  .preview-pane .task-item{list-style:none;margin-left:-1.2em;}
+  .preview-pane .task-item input{margin-right:.5em;}
+
+  /* ---------- Drag-and-drop de imágenes sobre el editor ---------- */
+  .drop-overlay{
+    display:none;position:absolute;inset:0;background:rgba(40,114,196,.18);
+    border:3px dashed #2872c4;z-index:20;pointer-events:none;
+    align-items:center;justify-content:center;
+  }
+  .drop-overlay.active{ display:flex; }
+  .drop-overlay-msg{
+    background:var(--bg-main);border:1px solid #2872c4;color:#2872c4;
+    padding:16px 28px;border-radius:10px;font-size:1rem;font-weight:600;
+  }
+
+  /* ---------- Imagen de entrada oculta ---------- */
+  #imageInput{ display:none; }
+
   /* ---------- Buscar / Reemplazar ---------- */
   .findbar{
     display:flex;flex-direction:column;gap:5px;padding:6px 10px;
@@ -401,6 +485,66 @@
   .modal-actions button:hover{background:var(--border);}
   .modal-actions button[data-modal-ok]{background:var(--accent);color:var(--bg-main);border-color:var(--accent);}
   .modal-actions button[data-modal-ok].modal-danger{background:var(--danger);border-color:var(--danger);color:#ffffff;}
+
+  /* ---------- Fondo oscuro compartido para hojas de menú y panel en mobile ---------- */
+  .mobileBackdrop{ display:none; }
+
+  /* ====================================================================
+     MOBILE (≤700px): menú compacto solo-icono, desplegables como hoja
+     centrada (evita que se recorten al no depender de scroll horizontal),
+     y panel de notas como overlay deslizante en vez de partir el ancho.
+     ==================================================================== */
+  @media (max-width:700px){
+    body{ padding:0 6px 10px 6px; }
+
+    /* Menú compacto: solo icono, sin texto debajo */
+    .menu-btn, .saveBtn{ min-width:0; padding:8px 10px; gap:0; }
+    .menu-btn svg, .saveBtn svg{ width:22px; height:22px; }
+    .menu-label{ display:none; }
+    .menubar-sep{ margin:6px 0; }
+    .panelToggle{ padding:14px 9px; }
+
+    /* Desplegables y submenús: hoja centrada en vez de anclada al botón,
+       así nunca quedan cortados por el borde de una pantalla angosta */
+    .menu-dropdown,
+    .menu-dropdown.dd-right,
+    .submenuwrap > .menu-dropdown.submenu{
+      position:fixed; top:50%; left:50%; right:auto;
+      transform:translate(-50%,-50%);
+      width:88vw; max-width:340px; max-height:75vh; overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.6); z-index:75;
+    }
+
+    /* Fondo oscuro detrás de la hoja de menú abierta o del panel de notas */
+    .mobileBackdrop{
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:65;
+    }
+    body.mobile-overlay-open .mobileBackdrop{ display:block; }
+
+    /* Panel de notas: overlay deslizante en vez de empujar el editor */
+    .notesPanel{
+      position:fixed; top:0; left:0; height:100%; width:0;
+      z-index:70; transition:width .2s ease;
+    }
+    .notesPanel.open{ width:85vw; max-width:300px; box-shadow:6px 0 28px rgba(0,0,0,.5); }
+    .notesPanel-inner{ width:100%; }
+
+    /* Toolbar Markdown: se comprime pero sigue siendo usable */
+    .md-toolbar{ padding:3px 4px; gap:1px; }
+    .md-toolbar button{ padding:3px 5px; font-size:.72rem; }
+
+    /* Buscar/Reemplazar: permite que la fila pase a dos líneas en vez de desbordar */
+    .findrow{ flex-wrap:wrap; }
+    .findbar input{ flex:1 1 140px; }
+    .findbar button{ padding:5px 8px; font-size:.72rem; }
+
+    /* Modales: nunca más anchos que la pantalla */
+    .modal-box{ min-width:0; width:92vw; max-width:360px; }
+    .modal-box.wide{ min-width:0; width:92vw; max-width:360px; }
+
+    /* Pestañas: un poco más angostas para que se vean más a la vez */
+    .tabpill{ max-width:140px; }
+  }
 </style>
 </head>
 <body>
@@ -426,7 +570,7 @@
     <button class="panelToggle" id="panelToggleBtn" title="Mostrar/ocultar panel de notas" aria-label="Mostrar u ocultar panel de notas">☰</button>
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="file">
-      <button class="menu-btn"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg>Archivo</button>
+      <button class="menu-btn" aria-label="Archivo"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg><span class="menu-label">Archivo</span></button>
       <div class="menu-dropdown">
         <button class="mi" data-action="newTab"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="18" x2="13" y2="18" stroke="#9aa3ad" stroke-width="1.3"/><circle cx="18.5" cy="18.5" r="3.6" fill="#2f9e44"/><path d="M18.5 16.8v3.4M16.8 18.5h3.4" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/></svg>Nueva pestaña<span class="kbd">Ctrl+N</span></button>
         <button class="mi" data-action="newWindow"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><rect x="3" y="4" width="18" height="4.5" rx="1.5" fill="#2872c4"/><circle cx="6" cy="6.3" r=".8" fill="#ffffff"/><circle cx="8.2" cy="6.3" r=".8" fill="#ffffff"/></svg>Nueva ventana<span class="kbd">Ctrl+Shift+N</span></button>
@@ -452,7 +596,7 @@
 
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="edit">
-      <button class="menu-btn"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 20l1-4.2L15.5 5.3a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19l-4.2 1z" fill="#2872c4"/><path d="M4 20l1-4.2 3.2 3.2z" fill="#9aa3ad"/><path d="M14.3 6.5l3.2 3.2" stroke="#ffffff" stroke-width="1.1"/></svg>Edición</button>
+      <button class="menu-btn" aria-label="Edición"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 20l1-4.2L15.5 5.3a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19l-4.2 1z" fill="#2872c4"/><path d="M4 20l1-4.2 3.2 3.2z" fill="#9aa3ad"/><path d="M14.3 6.5l3.2 3.2" stroke="#ffffff" stroke-width="1.1"/></svg><span class="menu-label">Edición</span></button>
       <div class="menu-dropdown">
         <button class="mi" data-action="undo"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round"/><path d="M9 14l-5-5 5-5" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Deshacer<span class="kbd">Ctrl+Z</span></button>
         <button class="mi" data-action="cut"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" fill="#f0883e"/><circle cx="6" cy="18" r="3" fill="#2872c4"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12" stroke="#9aa3ad" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Cortar<span class="kbd">Ctrl+X</span></button>
@@ -469,25 +613,27 @@
         <div class="mi-sep"></div>
         <button class="mi" data-action="selectAll"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-dasharray="3 2.4"/><circle cx="3.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="3.5" cy="20.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="20.5" r="1.6" fill="#2872c4"/></svg>Seleccionar todo<span class="kbd">Ctrl+A</span></button>
         <button class="mi" data-action="dateTime"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="1.5" fill="#ffffff" stroke="#c9ccd1" stroke-width="1"/><rect x="3" y="4" width="18" height="5" rx="1.5" fill="#e5484d"/><rect x="7" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="15.2" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="12" width="3.4" height="3" fill="#2872c4"/><rect x="14.6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="6" y="16" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="16" width="3.4" height="3" fill="#cdddf3"/></svg>Fecha y hora<span class="kbd">F5</span></button>
+        <div class="mi-sep"></div>
+        <button class="mi" data-action="insertImage"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="#eef3fb" stroke="#2872c4" stroke-width="1.4"/><circle cx="8.5" cy="8.5" r="2" fill="#f0b429"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="#2f9e44" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Insertar imagen<span class="kbd">Ctrl+Shift+I</span></button>
       </div>
     </div>
 
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="font" id="fontMenuWrap">
-      <button class="menu-btn"><svg viewBox="0 0 24 24" width="24" height="24"><text x="0" y="18" font-size="17" font-weight="700" fill="#2872c4" font-family="Georgia,serif">A</text><text x="13" y="19" font-size="12" font-weight="700" fill="#e5484d" font-family="Georgia,serif">a</text></svg>Fuente</button>
+      <button class="menu-btn" aria-label="Fuente"><svg viewBox="0 0 24 24" width="24" height="24"><text x="0" y="18" font-size="17" font-weight="700" fill="#2872c4" font-family="Georgia,serif">A</text><text x="13" y="19" font-size="12" font-weight="700" fill="#e5484d" font-family="Georgia,serif">a</text></svg><span class="menu-label">Fuente</span></button>
       <div class="menu-dropdown dd-right" id="fontMenuDropdown"></div>
     </div>
 
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="scheme">
-      <button class="menu-btn"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-.9 2-2 0-.6-.3-1-.6-1.4-.3-.4-.5-.7-.5-1.2 0-.9.7-1.4 1.6-1.4h2A4.5 4.5 0 0 0 21 11.5C21 6.3 17 2 12 2z" fill="#f3f4f6" stroke="#c9ccd1" stroke-width="1"/><circle cx="7.5" cy="10" r="1.6" fill="#e5484d"/><circle cx="9.5" cy="6.5" r="1.6" fill="#f0b429"/><circle cx="14" cy="6" r="1.6" fill="#2f9e44"/><circle cx="17" cy="9.5" r="1.6" fill="#2872c4"/></svg>Color</button>
+      <button class="menu-btn" aria-label="Color"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-.9 2-2 0-.6-.3-1-.6-1.4-.3-.4-.5-.7-.5-1.2 0-.9.7-1.4 1.6-1.4h2A4.5 4.5 0 0 0 21 11.5C21 6.3 17 2 12 2z" fill="#f3f4f6" stroke="#c9ccd1" stroke-width="1"/><circle cx="7.5" cy="10" r="1.6" fill="#e5484d"/><circle cx="9.5" cy="6.5" r="1.6" fill="#f0b429"/><circle cx="14" cy="6" r="1.6" fill="#2f9e44"/><circle cx="17" cy="9.5" r="1.6" fill="#2872c4"/></svg><span class="menu-label">Color</span></button>
       <div class="menu-dropdown dd-right" id="schemeMenuDropdown"></div>
     </div>
 
     <div class="menubar-sep push"></div>
-    <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)">
+    <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)" aria-label="Guardar">
       <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>
-      Guardar
+      <span class="menu-label">Guardar</span>
     </button>
   </nav>
 
@@ -550,11 +696,14 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V5.9.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V6.1.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
+  <input type="file" id="imageInput" accept="image/*" hidden>
   </div>
+
+  <div class="mobileBackdrop" id="mobileBackdrop"></div>
 
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box" id="modalBox"></div>
@@ -733,7 +882,7 @@
       t.ta.readOnly = locked;
       t.ta.placeholder = locked
         ? 'Conecta una carpeta de guardado (Archivo → Carpeta de guardado…) para empezar a escribir.'
-        : 'Escribe tu nota aquí…';
+        : 'Escribe tu nota aquí… (soporta Markdown)';
     });
     connectBar.classList.toggle('show', locked && !pendingDirHandle);
   }
@@ -830,6 +979,7 @@
     notesPanelOpen = !notesPanelOpen;
     notesPanel.classList.toggle('open', notesPanelOpen);
     panelToggleBtn.classList.toggle('active', notesPanelOpen);
+    syncMobileOverlay();
     if(notesPanelOpen) refreshNotesPanel();
   }
   panelToggleBtn.addEventListener('click', toggleNotesPanel);
@@ -1110,23 +1260,107 @@
   function createTab(opts){
     opts = opts || {};
     const id = 'tab' + (++tabCounter);
+
+    // ── Wrapper que agrupa toolbar + editor + preview ──────────────────
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tab-wrapper';
+    wrapper.dataset.tabId = id;
+
+    // ── Toolbar de Markdown ────────────────────────────────────────────
+    const toolbar = document.createElement('div');
+    toolbar.className = 'md-toolbar';
+    toolbar.innerHTML = `
+      <button data-md="bold"      title="Negrita (Ctrl+B)"><strong>B</strong></button>
+      <button data-md="italic"    title="Cursiva (Ctrl+I)"><em>I</em></button>
+      <button data-md="strike"    title="Tachado"><del>S</del></button>
+      <div class="md-toolbar-sep"></div>
+      <button data-md="h1"        title="Título 1">H1</button>
+      <button data-md="h2"        title="Título 2">H2</button>
+      <button data-md="h3"        title="Título 3">H3</button>
+      <div class="md-toolbar-sep"></div>
+      <button data-md="ul"        title="Lista con viñetas">• Lista</button>
+      <button data-md="ol"        title="Lista numerada">1. Lista</button>
+      <button data-md="task"      title="Lista de tareas">☑ Tarea</button>
+      <div class="md-toolbar-sep"></div>
+      <button data-md="link"      title="Enlace">🔗 Link</button>
+      <button data-md="code"      title="Código inline">&lt;/&gt;</button>
+      <button data-md="codeblock" title="Bloque de código">⌥ Bloque</button>
+      <button data-md="quote"     title="Cita">" Cita</button>
+      <button data-md="hr"        title="Línea horizontal">— HR</button>
+      <div class="md-toolbar-sep"></div>
+      <button data-md="image"     title="Insertar imagen (Ctrl+Shift+I)">🖼 Imagen</button>
+      <div class="md-toolbar-sep"></div>
+      <button data-md="preview"   title="Vista previa (Ctrl+Shift+P)" id="previewBtn-${id}">👁 Preview</button>
+    `;
+    wrapper.appendChild(toolbar);
+
+    // ── Textarea ───────────────────────────────────────────────────────
     const ta = document.createElement('textarea');
-    ta.className = 'editor';
+    ta.className = 'editor active';
     ta.spellcheck = true;
     ta.lang = 'es';
     ta.readOnly = isLocked();
     ta.placeholder = isLocked()
       ? 'Conecta una carpeta de guardado (Archivo → Carpeta de guardado…) para empezar a escribir.'
-      : 'Escribe tu nota aquí…';
+      : 'Escribe tu nota aquí… (soporta Markdown)';
     ta.value = opts.content || '';
-    editorstack.appendChild(ta);
+    wrapper.appendChild(ta);
+
+    // ── Preview pane ──────────────────────────────────────────────────
+    const preview = document.createElement('div');
+    preview.className = 'preview-pane';
+    wrapper.appendChild(preview);
+
+    // ── Drag-drop overlay ─────────────────────────────────────────────
+    const dropOverlay = document.createElement('div');
+    dropOverlay.className = 'drop-overlay';
+    dropOverlay.innerHTML = '<div class="drop-overlay-msg">📷 Suelta la imagen aquí</div>';
+    wrapper.appendChild(dropOverlay);
+
+    editorstack.appendChild(wrapper);
 
     const tab = {
       id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
-      ta, originalContent: opts.content || '', pinned: false
+      ta, preview, wrapper, originalContent: opts.content || '',
+      pinned: false, previewMode: false
     };
     tabs.push(tab);
+
+    // ── Eventos toolbar ───────────────────────────────────────────────
+    toolbar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-md]');
+      if(!btn) return;
+      const cmd = btn.getAttribute('data-md');
+      if(cmd === 'preview'){ togglePreview(tab); return; }
+      if(cmd === 'image'){ insertImageCmd(); return; }
+      applyMdFormat(ta, cmd);
+    });
+
+    // ── Drag & Drop de imágenes ───────────────────────────────────────
+    wrapper.addEventListener('dragover', function(e){
+      if([...e.dataTransfer.items].some(i => i.type.startsWith('image/'))){
+        e.preventDefault(); dropOverlay.classList.add('active');
+      }
+    });
+    wrapper.addEventListener('dragleave', function(e){
+      if(!wrapper.contains(e.relatedTarget)) dropOverlay.classList.remove('active');
+    });
+    wrapper.addEventListener('drop', async function(e){
+      e.preventDefault(); dropOverlay.classList.remove('active');
+      const file = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
+      if(file) await embedImage(ta, file);
+    });
+
+    // ── Pegar imágenes con Ctrl+V ─────────────────────────────────────
+    ta.addEventListener('paste', async function(e){
+      const imgItem = [...(e.clipboardData.items||[])].find(i => i.type.startsWith('image/'));
+      if(!imgItem) return; // texto normal → dejar que el browser lo maneje
+      e.preventDefault();
+      await embedImage(ta, imgItem.getAsFile());
+    });
+
     attachEditorEvents(ta);
+    wrapper.classList.remove('active'); // activateTab lo activa
     if(opts.makeActive !== false) activateTab(id);
     else buildTabsBar();
     if(tab.handle) persistOpenTabs();
@@ -1135,11 +1369,16 @@
 
   function activateTab(id){
     activeTabId = id;
-    tabs.forEach(t => t.ta.classList.toggle('active', t.id === id));
+    tabs.forEach(t => {
+      t.wrapper.classList.toggle('active', t.id === id);
+      t.ta.classList.toggle('active', t.id === id && !t.previewMode);
+      t.preview.classList.toggle('active', t.id === id && t.previewMode);
+    });
     buildTabsBar();
     refreshAll();
     syncLocationWarning();
-    activeTextarea() && activeTextarea().focus();
+    const t = activeTab();
+    if(t && !t.previewMode) t.ta.focus();
   }
 
   async function closeTab(id, skipConfirm){
@@ -1153,7 +1392,7 @@
       if(!ok) return;
     }
     const idx = tabs.indexOf(tab);
-    tab.ta.remove();
+    tab.wrapper.remove();
     tabs.splice(idx, 1);
     if(tab.handle) persistOpenTabs();
     if(tabs.length === 0){
@@ -1770,6 +2009,15 @@
 
   // ============ Menú: apertura / cierre ============
   const menuEls = Array.from(document.querySelectorAll('.menubar > .menu'));
+  const mobileBackdrop = document.getElementById('mobileBackdrop');
+  function syncMobileOverlay(){
+    const anyMenuOpen = menuEls.some(m => m.classList.contains('open'));
+    document.body.classList.toggle('mobile-overlay-open', anyMenuOpen || notesPanelOpen);
+  }
+  mobileBackdrop.addEventListener('click', function(){
+    closeAllMenus();
+    if(notesPanelOpen) toggleNotesPanel();
+  });
   function refreshMenuContent(menuEl){
     if(menuEl.dataset.menu === 'file') buildRecentMenu();
     if(menuEl.dataset.menu === 'font') buildFontMenu();
@@ -1785,11 +2033,13 @@
         menuEl.classList.add('open');
         refreshMenuContent(menuEl);
       }
+      syncMobileOverlay();
     });
     btn.addEventListener('mouseenter', function(){
       if(menuEls.some(m => m.classList.contains('open')) && !menuEl.classList.contains('open')){
         closeAllMenus(); menuEl.classList.add('open');
         refreshMenuContent(menuEl);
+        syncMobileOverlay();
       }
     });
   });
@@ -1811,12 +2061,213 @@
   function closeAllMenus(){
     menuEls.forEach(m => m.classList.remove('open'));
     document.querySelectorAll('.submenuwrap').forEach(w => w.classList.remove('open'));
+    syncMobileOverlay();
   }
   document.addEventListener('click', function(e){
     if(!e.target.closest('.menubar')) closeAllMenus();
   });
 
   // ============ despacho de acciones del menú ============
+  // ============================================================
+  // MARKDOWN: renderizador puro JS, sin dependencias externas
+  // ============================================================
+  function renderMarkdown(md){
+    let html = md;
+    // Escapar caracteres HTML excepto los que usamos a continuación
+    function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // Bloques de código cercados (``` ... ```)
+    const codeBlocks = [];
+    html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_,lang,code){
+      const i = codeBlocks.length;
+      codeBlocks.push('<pre><code class="lang-'+esc(lang)+'">'+esc(code.replace(/^\n/,'').replace(/\n$/,''))+'</code></pre>');
+      return '\x00CODE'+i+'\x00';
+    });
+    // Código inline
+    const inlineCodes = [];
+    html = html.replace(/`([^`]+)`/g, function(_,code){
+      const i = inlineCodes.length;
+      inlineCodes.push('<code>'+esc(code)+'</code>');
+      return '\x00IC'+i+'\x00';
+    });
+
+    // Imágenes  ![alt](src)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, function(_,alt,src){
+      return '<img src="'+src+'" alt="'+esc(alt)+'" loading="lazy">';
+    });
+    // Links [text](url)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    // Encabezados
+    html = html.replace(/^######\s(.+)$/gm,'<h6>$1</h6>');
+    html = html.replace(/^#####\s(.+)$/gm,'<h5>$1</h5>');
+    html = html.replace(/^####\s(.+)$/gm,'<h4>$1</h4>');
+    html = html.replace(/^###\s(.+)$/gm,'<h3>$1</h3>');
+    html = html.replace(/^##\s(.+)$/gm,'<h2>$1</h2>');
+    html = html.replace(/^#\s(.+)$/gm,'<h1>$1</h1>');
+
+    // HR
+    html = html.replace(/^---+$/gm,'<hr>');
+    html = html.replace(/^\*\*\*+$/gm,'<hr>');
+
+    // Negrita, cursiva, tachado
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    html = html.replace(/__(.+?)__/g,'<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g,'<em>$1</em>');
+    html = html.replace(/_(.+?)_/g,'<em>$1</em>');
+    html = html.replace(/~~(.+?)~~/g,'<del>$1</del>');
+
+    // Blockquotes
+    html = html.replace(/^>\s?(.*)$/gm,'<blockquote>$1</blockquote>');
+    html = html.replace(/<\/blockquote>\n<blockquote>/g,'\n');
+
+    // Tablas (simple)
+    html = html.replace(/((?:^\|.+\|\n?)+)/gm, function(block){
+      const rows = block.trim().split('\n');
+      if(rows.length < 2) return block;
+      const isSep = rows[1].replace(/\|/g,'').trim().match(/^[-: ]+$/);
+      if(!isSep) return block;
+      const header = rows[0].split('|').filter((_,i,a) => i>0 && i<a.length-1).map(c=>'<th>'+c.trim()+'</th>').join('');
+      const body = rows.slice(2).map(r => {
+        const cells = r.split('|').filter((_,i,a) => i>0 && i<a.length-1).map(c=>'<td>'+c.trim()+'</td>').join('');
+        return '<tr>'+cells+'</tr>';
+      }).join('');
+      return '<table><thead><tr>'+header+'</tr></thead><tbody>'+body+'</tbody></table>';
+    });
+
+    // Listas de tareas
+    html = html.replace(/^- \[x\] (.+)$/gim,'<li class="task-item"><input type="checkbox" checked disabled> $1</li>');
+    html = html.replace(/^- \[ \] (.+)$/gim,'<li class="task-item"><input type="checkbox" disabled> $1</li>');
+    // Listas desordenadas
+    html = html.replace(/^[-*+]\s(.+)$/gm,'<li>$1</li>');
+    html = html.replace(/(<li>[\s\S]+?<\/li>)(?!\s*<li>)/g,'<ul>$1</ul>');
+    // Listas ordenadas
+    html = html.replace(/^\d+\.\s(.+)$/gm,'<oli>$1</oli>');
+    html = html.replace(/(<oli>[\s\S]+?<\/oli>)(?!\s*<oli>)/g, s => '<ol>'+s.replace(/<\/?oli>/g, m => m==='<oli>'?'<li>':'</li>')+'</ol>');
+
+    // Párrafos: líneas que no son bloques HTML
+    html = html.replace(/^(?!<[a-zA-Z\/]|$)(.+)$/gm,'<p>$1</p>');
+
+    // Restaurar bloques de código e inline code
+    inlineCodes.forEach((c,i) => { html = html.replace('\x00IC'+i+'\x00', c); });
+    codeBlocks.forEach((c,i) => { html = html.replace('\x00CODE'+i+'\x00', c); });
+
+    return html;
+  }
+
+  function togglePreview(tab){
+    if(!tab) tab = activeTab();
+    if(!tab) return;
+    tab.previewMode = !tab.previewMode;
+    if(tab.previewMode){
+      tab.preview.innerHTML = renderMarkdown(tab.ta.value);
+      tab.ta.classList.remove('active');
+      tab.preview.classList.add('active');
+    } else {
+      tab.preview.classList.remove('active');
+      tab.ta.classList.add('active');
+      tab.ta.focus();
+    }
+    // Actualiza el botón de la toolbar
+    const btn = tab.wrapper.querySelector('[data-md="preview"]');
+    if(btn) btn.classList.toggle('active-mode', tab.previewMode);
+  }
+
+  // Aplica formato Markdown en el punto de inserción (o alrededor de la selección)
+  function applyMdFormat(ta, cmd){
+    if(isLocked()) return;
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end);
+    const line = ta.value.lastIndexOf('\n', start-1)+1;
+    let insert='', newStart=start, newEnd=end;
+    const WRAP = {
+      bold:      { pre:'**',  post:'**',  def:'texto en negrita' },
+      italic:    { pre:'*',   post:'*',   def:'texto en cursiva' },
+      strike:    { pre:'~~',  post:'~~',  def:'texto tachado'    },
+      code:      { pre:'`',   post:'`',   def:'código'           },
+    };
+    if(WRAP[cmd]){
+      const {pre,post,def} = WRAP[cmd];
+      const txt = sel || def;
+      insert = pre+txt+post;
+      ta.setRangeText(insert, start, end, 'end');
+      ta.setSelectionRange(start+pre.length, start+pre.length+txt.length);
+      refreshAll(); return;
+    }
+    const LINE_PRE = {
+      h1:'# ', h2:'## ', h3:'### ', ul:'- ', ol:'1. ', task:'- [ ] ', quote:'> '
+    };
+    if(LINE_PRE[cmd]){
+      const pre = LINE_PRE[cmd];
+      const curLine = ta.value.substring(line, end);
+      const already = curLine.startsWith(pre);
+      const replacement = already
+        ? ta.value.substring(line).replace(pre, '')
+        : pre + ta.value.substring(line);
+      ta.value = ta.value.substring(0, line) + replacement;
+      ta.setSelectionRange(line + pre.length, line + pre.length);
+      refreshAll(); return;
+    }
+    if(cmd === 'codeblock'){
+      insert = '\n```\n'+(sel||'código aquí')+'\n```\n';
+      ta.setRangeText(insert, start, end, 'end');
+      refreshAll(); return;
+    }
+    if(cmd === 'hr'){
+      ta.setRangeText('\n---\n', start, end, 'end');
+      refreshAll(); return;
+    }
+    if(cmd === 'link'){
+      const txt = sel || 'texto del enlace';
+      insert = '['+txt+'](url)';
+      ta.setRangeText(insert, start, end, 'end');
+      ta.setSelectionRange(start+txt.length+3, start+insert.length-1);
+      refreshAll(); return;
+    }
+  }
+
+  // Convierte un File de imagen a base64 y lo inserta como sintaxis Markdown
+  async function embedImage(ta, file){
+    if(!file || !file.type.startsWith('image/')) return;
+    if(isLocked()){ showToast('Conecta una carpeta de guardado para insertar imágenes.'); return; }
+    // Aviso si la imagen es grande
+    if(file.size > 2*1024*1024){
+      const ok = await confirmModal(
+        'La imagen pesa '+Math.round(file.size/1024)+' KB. Las imágenes grandes se guardan como base64 dentro del archivo .md y pueden hacerlo muy pesado. ¿Continuar?',
+        { title: 'Imagen grande', confirmLabel: 'Insertar de todas formas' }
+      );
+      if(!ok) return;
+    }
+    showToast('Procesando imagen…');
+    const reader = new FileReader();
+    reader.onload = function(){
+      const dataUrl = reader.result;
+      const ext = file.name.split('.').pop() || 'png';
+      const altName = file.name.replace(/\.[^.]+$/, '') || 'imagen';
+      const mdImg = '\n!['+altName+']('+dataUrl+')\n';
+      const pos = ta.selectionStart;
+      ta.setRangeText(mdImg, pos, ta.selectionEnd, 'end');
+      refreshAll();
+      showToast('Imagen insertada ✓');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Abre el selector de archivo de imagen
+  const imageInput = document.getElementById('imageInput');
+  function insertImageCmd(){
+    const t = activeTab(); if(!t){ showToast('Abre una nota primero.'); return; }
+    if(isLocked()){ showToast('Conecta una carpeta de guardado primero.'); return; }
+    imageInput.value = '';
+    imageInput.click();
+  }
+  imageInput.addEventListener('change', async function(){
+    const file = imageInput.files[0]; if(!file) return;
+    const t = activeTab(); if(!t) return;
+    await embedImage(t.ta, file);
+  });
+
   const ACTIONS = {
     newTab, newWindow, open: openFile,
     save: () => saveTab(activeTab()), saveAs: () => saveTabAs(activeTab()), saveAll: saveAllTabs,
@@ -1826,7 +2277,8 @@
     find: () => toggleFindBar(true), findNext: () => searchDir(true), findPrev: () => searchDir(false),
     searchAll: searchAllNotes,
     replace: () => { toggleFindBar(true); toggleReplaceRow(true); }, goto: gotoLine,
-    selectAll: selectAllText, dateTime: insertDateTime
+    selectAll: selectAllText, dateTime: insertDateTime,
+    insertImage: insertImageCmd
   };
   document.querySelectorAll('.mi[data-action]').forEach(function(btn){
     btn.addEventListener('click', function(e){
@@ -1856,6 +2308,10 @@
     else if(ctrl && key === 'h'){ e.preventDefault(); toggleFindBar(true); toggleReplaceRow(true); }
     else if(ctrl && key === 'g'){ e.preventDefault(); gotoLine(); }
     else if(key === 'f5'){ e.preventDefault(); insertDateTime(); }
+    else if(ctrl && e.shiftKey && key === 'p'){ e.preventDefault(); togglePreview(activeTab()); }
+    else if(ctrl && e.shiftKey && key === 'i'){ e.preventDefault(); insertImageCmd(); }
+    else if(ctrl && key === 'b' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'bold'); } }
+    else if(ctrl && key === 'i' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'italic'); } }
     else if(ctrl && key === 'tab'){ e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); }
     else if(key === 'escape'){ closeAllMenus(); toggleFindBar(false); closeModal(); }
   });
