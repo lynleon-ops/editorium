@@ -3,51 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 6.1</title>
+<title>Editorium 6.7</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
     --editor-font-size:18px;
     --editor-font-family:Consolas,"Courier New",monospace;
-    --save-alert:#ff8c00; /* naranja fijo para el botón Guardar, no cambia con el tema */
-    --selection-bg:#ffd400; /* resaltado de selección/búsqueda, fijo y bien visible en cualquier tema */
+    --save-alert:#ff8c00;
+    --selection-bg:#ffd400;
     --selection-fg:#1a1a1a;
-    --danger:#e5484d; /* rojo fijo para borrar notas, no cambia con el tema */
-    /* Monokai */
-    --bg-main:#272822; --bg-toolbar:#1e1f1c; --bg-gutter:#2f3029; --bg-page:#171712;
-    --fg-text:#f8f8f2; --fg-muted:#8a877a; --accent:#a6e22e; --accent2:#f92672;
-    --border:#3e3d32; --selection:#49483e; --caret:#a6e22e;
+    --danger:#e5484d;
+    /* GitHub Light (default) */
+    --bg-main:#ffffff; --bg-toolbar:#f6f8fa; --bg-gutter:#f6f8fa; --bg-page:#c9d1d9;
+    --fg-text:#1f2328; --fg-muted:#59636e; --accent:#0969da; --accent2:#cf222e;
+    --border:#d0d7de; --selection:#b6e3ff; --caret:#0969da;
   }
-  html[data-theme="dracula"]{
-    --bg-main:#282a36; --bg-toolbar:#21222c; --bg-gutter:#2d2f3d; --bg-page:#191a22;
-    --fg-text:#f8f8f2; --fg-muted:#9aa3c9; --accent:#bd93f9; --accent2:#ff79c6;
-    --border:#44475a; --selection:#44475a; --caret:#bd93f9;
-  }
-  html[data-theme="solarized-dark"]{
-    --bg-main:#002b36; --bg-toolbar:#00212b; --bg-gutter:#073642; --bg-page:#00161c;
-    --fg-text:#93a1a1; --fg-muted:#6c8585; --accent:#2aa198; --accent2:#268bd2;
-    --border:#0a4554; --selection:#0a4554; --caret:#2aa198;
-  }
-  html[data-theme="solarized-light"]{
-    --bg-main:#fdf6e3; --bg-toolbar:#f5edd6; --bg-gutter:#eee8d5; --bg-page:#e4ded0;
-    --fg-text:#586e75; --fg-muted:#93a1a1; --accent:#268bd2; --accent2:#cb4b16;
-    --border:#e4dcc4; --selection:#e3dcc6; --caret:#cb4b16;
-  }
-  html[data-theme="nord"]{
-    --bg-main:#2e3440; --bg-toolbar:#262b36; --bg-gutter:#3b4252; --bg-page:#222631;
-    --fg-text:#d8dee9; --fg-muted:#8b97ab; --accent:#88c0d0; --accent2:#b48ead;
-    --border:#434c5e; --selection:#434c5e; --caret:#88c0d0;
-  }
-  html[data-theme="gruvbox"]{
-    --bg-main:#282828; --bg-toolbar:#1d2021; --bg-gutter:#32302f; --bg-page:#1a1a1a;
-    --fg-text:#ebdbb2; --fg-muted:#a89984; --accent:#fe8019; --accent2:#b8bb26;
-    --border:#45403d; --selection:#45403d; --caret:#fe8019;
-  }
-  /* GitHub Light — valores oficiales del sistema de diseño Primer de GitHub */
   html[data-theme="github-light"]{
     --bg-main:#ffffff; --bg-toolbar:#f6f8fa; --bg-gutter:#f6f8fa; --bg-page:#c9d1d9;
     --fg-text:#1f2328; --fg-muted:#59636e; --accent:#0969da; --accent2:#cf222e;
     --border:#d0d7de; --selection:#b6e3ff; --caret:#0969da;
+  }
+  html[data-theme="github-dark"]{
+    --bg-main:#0d1117; --bg-toolbar:#161b22; --bg-gutter:#161b22; --bg-page:#010409;
+    --fg-text:#e6edf3; --fg-muted:#7d8590; --accent:#2f81f7; --accent2:#ff7b72;
+    --border:#30363d; --selection:#264f78; --caret:#2f81f7;
   }
 
   *{box-sizing:border-box;}
@@ -205,32 +184,38 @@
   .submenuwrap.disabled > .mi:hover{background:transparent;color:var(--fg-muted);}
 
   /* ---------- Panel de todas mis notas ---------- */
-  .panelToggle{
-    background:transparent;border:none;color:var(--fg-text);cursor:pointer;
-    padding:16px 14px;font-size:.82rem;align-self:center;
-  }
-  .panelToggle:hover{background:var(--border);}
-  .panelToggle.active{color:var(--accent);}
   .notesPanel{
-    width:0;overflow:hidden;flex-shrink:0;
-    background:var(--bg-toolbar);border-right:1px solid var(--border);
+    width:240px;flex-shrink:0;
+    background:#f8f9fa;border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
   }
-  .notesPanel.open{width:240px;}
-  .notesPanel-inner{width:240px;height:100%;overflow-y:auto;padding:10px;}
+  .notesPanel-inner{width:240px;height:100%;overflow-y:auto;padding:14px 12px;}
 
+  /* Nombre de la app arriba del panel */
+  .notesPanel-appName{
+    font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--fg-muted);padding:0 2px 12px;
+  }
+
+  /* Botón nueva nota — grande, uppercase, prominente */
   .notesPanel-newBtn{
-    display:flex;align-items:center;gap:8px;width:100%;
-    background:var(--bg-main);border:1px solid var(--border);border-radius:10px;
-    color:var(--fg-text);padding:9px 12px;font-size:.8rem;font-weight:600;
-    cursor:pointer;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.12);
+    display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+    background:var(--bg-main);border:1.5px solid var(--border);border-radius:8px;
+    color:var(--fg-text);padding:11px 14px;font-size:.78rem;font-weight:700;
+    cursor:pointer;margin-bottom:18px;letter-spacing:.05em;text-transform:uppercase;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);transition:border-color .15s,box-shadow .15s;
   }
   .notesPanel-newBtn svg{flex-shrink:0;}
-  .notesPanel-newBtn:hover{border-color:var(--accent);color:var(--accent);}
+  .notesPanel-newBtn:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.14);}
 
+  /* Cabecera "MIS NOTAS" + lupa en línea */
   .notesPanel-header{
     display:flex;align-items:center;justify-content:space-between;
-    padding:0 2px 8px;font-size:.68rem;color:var(--fg-muted);
-    text-transform:uppercase;letter-spacing:.05em;
+    padding:0 2px 8px;
+  }
+  .notesPanel-headerLabel{
+    font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--fg-muted);
   }
   .notesPanel-searchBtn{
     background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
@@ -238,43 +223,46 @@
   }
   .notesPanel-searchBtn:hover{color:var(--accent);background:rgba(127,127,127,.12);}
 
-  .notesPanel-sortRow{display:flex;gap:6px;margin-bottom:10px;}
+  /* Fila de ordenamiento: FECHA + A-Z */
+  .notesPanel-sortRow{display:flex;gap:6px;margin-bottom:14px;}
   .notesPanel-sortBtn{
-    flex:1;background:transparent;border:1px solid var(--border);border-radius:8px;
-    color:var(--fg-muted);font-size:.66rem;padding:4px 6px;cursor:pointer;
-    text-transform:uppercase;letter-spacing:.03em;font-weight:600;
+    flex:1;background:transparent;border:1.5px solid var(--border);border-radius:2px;
+    color:var(--fg-muted);font-size:.66rem;padding:5px 8px;cursor:pointer;
+    text-transform:uppercase;letter-spacing:.04em;font-weight:700;
+    transition:all .12s;
   }
-  .notesPanel-sortBtn:hover{border-color:var(--accent);color:var(--fg-text);}
-  .notesPanel-sortBtn.active{background:var(--accent);border-color:var(--accent);color:var(--bg-main);}
+  .notesPanel-sortBtn:hover{border-color:var(--accent);color:var(--accent);}
+  .notesPanel-sortBtn.active{
+    background:var(--accent);border-color:var(--accent);
+    color:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,.18);
+  }
 
+  /* Cards de nota */
   .notesPanel-card{
-    background:var(--bg-main);border:1px solid var(--border);border-radius:10px;
-    padding:10px 12px;margin-bottom:8px;cursor:pointer;
-    box-shadow:0 1px 2px rgba(0,0,0,.10);transition:box-shadow .15s,border-color .15s;
+    background:var(--bg-main);border:1px solid var(--border);border-radius:8px;
+    padding:11px 13px;margin-bottom:8px;cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,.07);transition:box-shadow .15s,border-color .15s;
   }
-  .notesPanel-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.18);}
+  .notesPanel-card:hover{border-color:var(--accent);box-shadow:0 3px 10px rgba(0,0,0,.12);}
   .notesPanel-card.active{border-color:var(--accent);}
   .notesPanel-cardTop{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .notesPanel-cardTitle{
-    font-size:.82rem;font-weight:600;color:var(--fg-text);
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    font-size:.88rem;font-weight:700;color:var(--fg-text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3;
   }
-  .notesPanel-cardSub{font-size:.62rem;color:var(--fg-muted);margin-top:3px;letter-spacing:.02em;}
-  .notesPanel-renameBtn{
-    background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
-    padding:3px;flex-shrink:0;border-radius:4px;line-height:0;
+  .notesPanel-cardSub{
+    font-size:.67rem;color:var(--fg-muted);margin-top:4px;
   }
-  .notesPanel-renameBtn:hover{color:var(--accent);background:rgba(127,127,127,.14);}
   .notesPanel-trashBtn{
     background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
-    padding:3px;flex-shrink:0;border-radius:4px;line-height:0;
+    padding:3px;flex-shrink:0;border-radius:4px;line-height:0;opacity:.6;
   }
-  .notesPanel-trashBtn:hover{color:var(--danger);background:rgba(229,72,77,.14);}
+  .notesPanel-trashBtn:hover{color:var(--danger);background:rgba(229,72,77,.10);opacity:1;}
 
-  .notesPanel-empty{color:var(--fg-muted);font-size:.78rem;padding:7px 9px;line-height:1.6;}
+  .notesPanel-empty{color:var(--fg-muted);font-size:.78rem;padding:7px 2px;line-height:1.6;}
   .notesPanel-empty button{
-    margin-top:8px;background:var(--accent);color:var(--bg-main);border:none;
-    padding:6px 10px;font-size:.76rem;cursor:pointer;width:100%;
+    margin-top:8px;background:var(--accent);color:var(--bg-main);border:none;border-radius:6px;
+    padding:8px 10px;font-size:.76rem;cursor:pointer;width:100%;font-weight:600;
   }
 
   /* ---------- Aviso de edición bloqueada (sin carpeta conectada) ---------- */
@@ -327,21 +315,6 @@
     display:none;flex-direction:column;width:100%;height:100%;position:relative;
   }
   .tab-wrapper.active{ display:flex; }
-
-  /* ---------- Barra de herramientas Markdown ---------- */
-  .md-toolbar{
-    display:flex;align-items:center;gap:2px;flex-shrink:0;
-    background:var(--bg-toolbar);border-bottom:1px solid var(--border);padding:4px 8px;
-    flex-wrap:wrap;
-  }
-  .md-toolbar button{
-    background:transparent;border:1px solid transparent;color:var(--fg-text);
-    font-size:.78rem;padding:3px 7px;cursor:pointer;border-radius:4px;
-    font-family:var(--editor-font-family);line-height:1.2;
-  }
-  .md-toolbar button:hover{ background:var(--border);border-color:var(--border); }
-  .md-toolbar button.active-mode{ background:var(--accent);color:var(--bg-main);border-color:var(--accent); }
-  .md-toolbar-sep{ width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0; }
 
   /* ---------- Pane de preview Markdown ---------- */
   .preview-pane{
@@ -502,7 +475,6 @@
     .menu-btn svg, .saveBtn svg{ width:22px; height:22px; }
     .menu-label{ display:none; }
     .menubar-sep{ margin:6px 0; }
-    .panelToggle{ padding:14px 9px; }
 
     /* Desplegables y submenús: hoja centrada en vez de anclada al botón,
        así nunca quedan cortados por el borde de una pantalla angosta */
@@ -521,17 +493,14 @@
     }
     body.mobile-overlay-open .mobileBackdrop{ display:block; }
 
-    /* Panel de notas: overlay deslizante en vez de empujar el editor */
+    /* Panel de notas: overlay deslizante en mobile, arranca visible */
     .notesPanel{
-      position:fixed; top:0; left:0; height:100%; width:0;
-      z-index:70; transition:width .2s ease;
+      position:fixed; top:0; left:0; height:100%;
+      width:85vw; max-width:300px;
+      z-index:70; box-shadow:6px 0 28px rgba(0,0,0,.5);
+      transform:translateX(0); transition:transform .2s ease;
     }
-    .notesPanel.open{ width:85vw; max-width:300px; box-shadow:6px 0 28px rgba(0,0,0,.5); }
     .notesPanel-inner{ width:100%; }
-
-    /* Toolbar Markdown: se comprime pero sigue siendo usable */
-    .md-toolbar{ padding:3px 4px; gap:1px; }
-    .md-toolbar button{ padding:3px 5px; font-size:.72rem; }
 
     /* Buscar/Reemplazar: permite que la fila pase a dos líneas en vez de desbordar */
     .findrow{ flex-wrap:wrap; }
@@ -567,7 +536,6 @@
   <button class="tabAdd hidden" id="dummy" style="display:none"></button>
 
   <nav class="menubar">
-    <button class="panelToggle" id="panelToggleBtn" title="Mostrar/ocultar panel de notas" aria-label="Mostrar u ocultar panel de notas">☰</button>
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="file">
       <button class="menu-btn" aria-label="Archivo"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg><span class="menu-label">Archivo</span></button>
@@ -624,12 +592,6 @@
       <div class="menu-dropdown dd-right" id="fontMenuDropdown"></div>
     </div>
 
-    <div class="menubar-sep"></div>
-    <div class="menu" data-menu="scheme">
-      <button class="menu-btn" aria-label="Color"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2a10 10 0 1 0 0 20c1.4 0 2-.9 2-2 0-.6-.3-1-.6-1.4-.3-.4-.5-.7-.5-1.2 0-.9.7-1.4 1.6-1.4h2A4.5 4.5 0 0 0 21 11.5C21 6.3 17 2 12 2z" fill="#f3f4f6" stroke="#c9ccd1" stroke-width="1"/><circle cx="7.5" cy="10" r="1.6" fill="#e5484d"/><circle cx="9.5" cy="6.5" r="1.6" fill="#f0b429"/><circle cx="14" cy="6" r="1.6" fill="#2f9e44"/><circle cx="17" cy="9.5" r="1.6" fill="#2872c4"/></svg><span class="menu-label">Color</span></button>
-      <div class="menu-dropdown dd-right" id="schemeMenuDropdown"></div>
-    </div>
-
     <div class="menubar-sep push"></div>
     <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)" aria-label="Guardar">
       <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>
@@ -640,14 +602,15 @@
   <main class="workspace">
     <aside class="notesPanel" id="notesPanel">
       <div class="notesPanel-inner">
+        <div class="notesPanel-appName">Editorium</div>
         <button type="button" class="notesPanel-newBtn" id="notesPanelNewBtn">
           <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/><circle cx="18.5" cy="18.5" r="3.6" fill="#2f9e44"/><path d="M18.5 16.8v3.4M16.8 18.5h3.4" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/></svg>
           Nueva nota
         </button>
         <div class="notesPanel-header">
-          <span>Todas las notas</span>
+          <span class="notesPanel-headerLabel">Mis notas</span>
           <button type="button" class="notesPanel-searchBtn" id="notesPanelSearchBtn" title="Buscar en todas las notas" aria-label="Buscar en todas las notas">
-            <svg viewBox="0 0 24 24" width="15" height="15"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>
           </button>
         </div>
         <div class="notesPanel-sortRow" id="notesPanelSortRow">
@@ -689,14 +652,14 @@
       <span id="statusWords">0 palabras</span>
       <span id="statusChars">0 caracteres</span>
       <span id="statusEncoding">UTF-8</span>
-      <span id="statusScheme">GitHub Light</span>
+      <button id="themeToggleBtn" title="Cambiar entre GitHub Light y Dark" style="background:none;border:none;cursor:pointer;color:var(--fg-muted);font-size:.74rem;font-family:inherit;padding:0;">GitHub Light</button>
       <span id="folderStatus"></span>
       <span id="locationWarning"></span>
     </div>
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V6.1.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V6.7.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -723,13 +686,13 @@
   const statusLeft = document.getElementById('statusLeft');
   const statusWords = document.getElementById('statusWords');
   const statusChars = document.getElementById('statusChars');
-  const statusScheme = document.getElementById('statusScheme');
+  // statusScheme reemplazado por botón toggle en el statusbar
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
   const notesPanel = document.getElementById('notesPanel');
   const notesPanelList = document.getElementById('notesPanelList');
-  const panelToggleBtn = document.getElementById('panelToggleBtn');
   const recentSubmenu = document.getElementById('recentSubmenu');
   const fontMenuDropdown = document.getElementById('fontMenuDropdown');
-  const schemeMenuDropdown = document.getElementById('schemeMenuDropdown');
+  // schemeMenuDropdown eliminado — menú Color reemplazado por toggle en statusbar
   const modalOverlay = document.getElementById('modalOverlay');
   const modalBox = document.getElementById('modalBox');
   const quickSaveBtn = document.getElementById('quickSaveBtn');
@@ -745,25 +708,16 @@
   const notesPanelSearchBtn = document.getElementById('notesPanelSearchBtn');
 
   const TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" width="15" height="15"><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" fill="none" stroke="#9aa3ad" stroke-width="1.4"></path><path d="M4 6h16l-1.2 14.2A2 2 0 0 1 16.8 22H7.2a2 2 0 0 1-2-1.8z" fill="#e5484d"></path><line x1="3" y1="6" x2="21" y2="6" stroke="#9aa3ad" stroke-width="1.6" stroke-linecap="round"></line><line x1="10" y1="10" x2="10" y2="17" stroke="#ffffff" stroke-width="1.1"></line><line x1="14" y1="10" x2="14" y2="17" stroke="#ffffff" stroke-width="1.1"></line></svg>';
-  const RENAME_ICON_SVG = '<svg viewBox="0 0 24 24" width="15" height="15"><path d="M4 20l1-4.2L15.5 5.3a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19l-4.2 1z" fill="#2872c4"></path><path d="M4 20l1-4.2 3.2 3.2z" fill="#9aa3ad"></path><path d="M14.3 6.5l3.2 3.2" stroke="#ffffff" stroke-width="1.1"></path></svg>';
   const DOC_ICON_SVG = '<svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/></svg>';
 
   const supportsFSAccess = 'showOpenFilePicker' in window;
   const THEMES = [
-    ['monokai','Monokai'], ['dracula','Dracula'],
-    ['solarized-dark','Solarized Dark'], ['solarized-light','Solarized Light'],
-    ['nord','Nord'], ['gruvbox','Gruvbox Dark'], ['github-light','GitHub Light']
+    ['github-light','GitHub Light'],
+    ['github-dark','GitHub Dark']
   ];
-  // Colores de vista previa para el swatch de cada tema en el menú Color
-  // (deben coincidir con --bg-main/--accent de cada bloque html[data-theme=...] del CSS).
   const THEME_SWATCH = {
-    'monokai': ['#272822', '#a6e22e'],
-    'dracula': ['#282a36', '#bd93f9'],
-    'solarized-dark': ['#002b36', '#2aa198'],
-    'solarized-light': ['#fdf6e3', '#268bd2'],
-    'nord': ['#2e3440', '#88c0d0'],
-    'gruvbox': ['#282828', '#fe8019'],
-    'github-light': ['#ffffff', '#0969da']
+    'github-light': ['#ffffff', '#0969da'],
+    'github-dark':  ['#0d1117', '#2f81f7']
   };
 
   let tabs = [];        // {id, name, handle, ta, originalContent}
@@ -971,18 +925,10 @@
   connectBarBtn.addEventListener('click', chooseSaveFolder);
 
   // ============ Panel de todas mis notas ============
-  let notesPanelOpen = false;
+  const notesPanelOpen = true; // panel siempre fijo y visible
   let notesSortMode = 'date'; // 'date' (más reciente primero) o 'alpha' (A-Z)
   const notesPanelSortRow = document.getElementById('notesPanelSortRow');
 
-  function toggleNotesPanel(){
-    notesPanelOpen = !notesPanelOpen;
-    notesPanel.classList.toggle('open', notesPanelOpen);
-    panelToggleBtn.classList.toggle('active', notesPanelOpen);
-    syncMobileOverlay();
-    if(notesPanelOpen) refreshNotesPanel();
-  }
-  panelToggleBtn.addEventListener('click', toggleNotesPanel);
   notesPanelNewBtn.addEventListener('click', newTab);
   notesPanelSearchBtn.addEventListener('click', searchAllNotes);
   notesPanelSortRow.addEventListener('click', function(e){
@@ -993,11 +939,24 @@
     refreshNotesPanel();
   });
 
-  const MONTHS_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function formatLastEdited(ts){
-    if(!ts) return 'Last Edition: —';
+    if(!ts) return 'Última edición: —';
+    const now = new Date();
     const d = new Date(ts);
-    return 'Last Edition: ' + d.getDate() + ' ' + MONTHS_EN[d.getMonth()] + ' ' + d.getFullYear();
+    const hhmm = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dMidnight   = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.round((todayMidnight - dMidnight) / 86400000);
+    let when;
+    if(diffDays === 0)      when = 'Hoy, ' + hhmm;
+    else if(diffDays === 1) when = 'Ayer';
+    else if(diffDays < 7)  when = 'Hace ' + diffDays + ' días';
+    else {
+      const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      when = d.getDate() + ' ' + MESES[d.getMonth()];
+      if(d.getFullYear() !== now.getFullYear()) when += ' ' + d.getFullYear();
+    }
+    return 'Última edición: ' + when;
   }
 
   async function refreshNotesPanel(){
@@ -1037,7 +996,6 @@
       card.innerHTML =
         '<div class="notesPanel-cardTop">' +
           '<span class="notesPanel-cardTitle">' + escapeHtml(item.name) + '</span>' +
-          '<button type="button" class="notesPanel-renameBtn" title="Renombrar nota" aria-label="Renombrar nota">' + RENAME_ICON_SVG + '</button>' +
           '<button type="button" class="notesPanel-trashBtn" title="Eliminar nota" aria-label="Eliminar nota">' + TRASH_ICON_SVG + '</button>' +
         '</div>' +
         '<div class="notesPanel-cardSub">' + formatLastEdited(item.lastModified) + '</div>';
@@ -1049,10 +1007,6 @@
           const text = await file.text();
           createTab({ name: item.name, content: text, handle: item.handle });
         }catch(e){ await alertModal('No se pudo abrir el archivo.'); }
-      });
-      card.querySelector('.notesPanel-renameBtn').addEventListener('click', function(e){
-        e.stopPropagation();
-        renameNote(item);
       });
       card.querySelector('.notesPanel-trashBtn').addEventListener('click', function(e){
         e.stopPropagation();
@@ -1266,34 +1220,6 @@
     wrapper.className = 'tab-wrapper';
     wrapper.dataset.tabId = id;
 
-    // ── Toolbar de Markdown ────────────────────────────────────────────
-    const toolbar = document.createElement('div');
-    toolbar.className = 'md-toolbar';
-    toolbar.innerHTML = `
-      <button data-md="bold"      title="Negrita (Ctrl+B)"><strong>B</strong></button>
-      <button data-md="italic"    title="Cursiva (Ctrl+I)"><em>I</em></button>
-      <button data-md="strike"    title="Tachado"><del>S</del></button>
-      <div class="md-toolbar-sep"></div>
-      <button data-md="h1"        title="Título 1">H1</button>
-      <button data-md="h2"        title="Título 2">H2</button>
-      <button data-md="h3"        title="Título 3">H3</button>
-      <div class="md-toolbar-sep"></div>
-      <button data-md="ul"        title="Lista con viñetas">• Lista</button>
-      <button data-md="ol"        title="Lista numerada">1. Lista</button>
-      <button data-md="task"      title="Lista de tareas">☑ Tarea</button>
-      <div class="md-toolbar-sep"></div>
-      <button data-md="link"      title="Enlace">🔗 Link</button>
-      <button data-md="code"      title="Código inline">&lt;/&gt;</button>
-      <button data-md="codeblock" title="Bloque de código">⌥ Bloque</button>
-      <button data-md="quote"     title="Cita">" Cita</button>
-      <button data-md="hr"        title="Línea horizontal">— HR</button>
-      <div class="md-toolbar-sep"></div>
-      <button data-md="image"     title="Insertar imagen (Ctrl+Shift+I)">🖼 Imagen</button>
-      <div class="md-toolbar-sep"></div>
-      <button data-md="preview"   title="Vista previa (Ctrl+Shift+P)" id="previewBtn-${id}">👁 Preview</button>
-    `;
-    wrapper.appendChild(toolbar);
-
     // ── Textarea ───────────────────────────────────────────────────────
     const ta = document.createElement('textarea');
     ta.className = 'editor active';
@@ -1325,16 +1251,6 @@
       pinned: false, previewMode: false
     };
     tabs.push(tab);
-
-    // ── Eventos toolbar ───────────────────────────────────────────────
-    toolbar.addEventListener('click', function(e){
-      const btn = e.target.closest('[data-md]');
-      if(!btn) return;
-      const cmd = btn.getAttribute('data-md');
-      if(cmd === 'preview'){ togglePreview(tab); return; }
-      if(cmd === 'image'){ insertImageCmd(); return; }
-      applyMdFormat(ta, cmd);
-    });
 
     // ── Drag & Drop de imágenes ───────────────────────────────────────
     wrapper.addEventListener('dragover', function(e){
@@ -1959,27 +1875,16 @@
     });
   }
 
-  function buildSchemeMenu(){
-    let html = '';
-    THEMES.forEach(function(pair){
-      const checked = document.documentElement.getAttribute('data-theme') === pair[0];
-      const sw = THEME_SWATCH[pair[0]] || ['#888888', '#888888'];
-      html += '<button class="mi" data-theme-val="' + pair[0] + '"><span class="check">' +
-        (checked ? '✓' : '') + '</span><span class="theme-swatch" style="background:linear-gradient(135deg,' +
-        sw[0] + ' 50%,' + sw[1] + ' 50%);"></span>' + pair[1] + '</button>';
-    });
-    schemeMenuDropdown.innerHTML = html;
-  }
   function setTheme(name){
     document.documentElement.setAttribute('data-theme', name);
     const found = THEMES.find(p => p[0] === name);
-    statusScheme.textContent = found ? found[1] : name;
-    buildSchemeMenu();
+    if(themeToggleBtn) themeToggleBtn.textContent = found ? found[1] : name;
   }
-  schemeMenuDropdown.addEventListener('click', function(e){
-    const btn = e.target.closest('[data-theme-val]');
-    if(btn){ setTheme(btn.getAttribute('data-theme-val')); closeAllMenus(); }
-  });
+  function toggleTheme(){
+    const current = document.documentElement.getAttribute('data-theme') || 'github-light';
+    setTheme(current === 'github-light' ? 'github-dark' : 'github-light');
+  }
+  if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
   function buildRecentMenu(){
     if(!supportsFSAccess){
@@ -2016,12 +1921,10 @@
   }
   mobileBackdrop.addEventListener('click', function(){
     closeAllMenus();
-    if(notesPanelOpen) toggleNotesPanel();
   });
   function refreshMenuContent(menuEl){
     if(menuEl.dataset.menu === 'file') buildRecentMenu();
     if(menuEl.dataset.menu === 'font') buildFontMenu();
-    if(menuEl.dataset.menu === 'scheme') buildSchemeMenu();
   }
   menuEls.forEach(function(menuEl){
     const btn = menuEl.querySelector('.menu-btn');
@@ -2169,9 +2072,6 @@
       tab.ta.classList.add('active');
       tab.ta.focus();
     }
-    // Actualiza el botón de la toolbar
-    const btn = tab.wrapper.querySelector('[data-md="preview"]');
-    if(btn) btn.classList.toggle('active-mode', tab.previewMode);
   }
 
   // Aplica formato Markdown en el punto de inserción (o alrededor de la selección)
