@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 6.7</title>
+<title>Editorium 6.8</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -363,20 +363,7 @@
   .preview-pane .task-item{list-style:none;margin-left:-1.2em;}
   .preview-pane .task-item input{margin-right:.5em;}
 
-  /* ---------- Drag-and-drop de imágenes sobre el editor ---------- */
-  .drop-overlay{
-    display:none;position:absolute;inset:0;background:rgba(40,114,196,.18);
-    border:3px dashed #2872c4;z-index:20;pointer-events:none;
-    align-items:center;justify-content:center;
-  }
-  .drop-overlay.active{ display:flex; }
-  .drop-overlay-msg{
-    background:var(--bg-main);border:1px solid #2872c4;color:#2872c4;
-    padding:16px 28px;border-radius:10px;font-size:1rem;font-weight:600;
-  }
 
-  /* ---------- Imagen de entrada oculta ---------- */
-  #imageInput{ display:none; }
 
   /* ---------- Buscar / Reemplazar ---------- */
   .findbar{
@@ -581,8 +568,6 @@
         <div class="mi-sep"></div>
         <button class="mi" data-action="selectAll"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-dasharray="3 2.4"/><circle cx="3.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="3.5" cy="20.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="20.5" r="1.6" fill="#2872c4"/></svg>Seleccionar todo<span class="kbd">Ctrl+A</span></button>
         <button class="mi" data-action="dateTime"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="1.5" fill="#ffffff" stroke="#c9ccd1" stroke-width="1"/><rect x="3" y="4" width="18" height="5" rx="1.5" fill="#e5484d"/><rect x="7" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="15.2" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="12" width="3.4" height="3" fill="#2872c4"/><rect x="14.6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="6" y="16" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="16" width="3.4" height="3" fill="#cdddf3"/></svg>Fecha y hora<span class="kbd">F5</span></button>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="insertImage"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="#eef3fb" stroke="#2872c4" stroke-width="1.4"/><circle cx="8.5" cy="8.5" r="2" fill="#f0b429"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="#2f9e44" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Insertar imagen<span class="kbd">Ctrl+Shift+I</span></button>
       </div>
     </div>
 
@@ -659,11 +644,10 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V6.7.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V6.8.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
-  <input type="file" id="imageInput" accept="image/*" hidden>
   </div>
 
   <div class="mobileBackdrop" id="mobileBackdrop"></div>
@@ -1237,12 +1221,6 @@
     preview.className = 'preview-pane';
     wrapper.appendChild(preview);
 
-    // ── Drag-drop overlay ─────────────────────────────────────────────
-    const dropOverlay = document.createElement('div');
-    dropOverlay.className = 'drop-overlay';
-    dropOverlay.innerHTML = '<div class="drop-overlay-msg">📷 Suelta la imagen aquí</div>';
-    wrapper.appendChild(dropOverlay);
-
     editorstack.appendChild(wrapper);
 
     const tab = {
@@ -1252,31 +1230,8 @@
     };
     tabs.push(tab);
 
-    // ── Drag & Drop de imágenes ───────────────────────────────────────
-    wrapper.addEventListener('dragover', function(e){
-      if([...e.dataTransfer.items].some(i => i.type.startsWith('image/'))){
-        e.preventDefault(); dropOverlay.classList.add('active');
-      }
-    });
-    wrapper.addEventListener('dragleave', function(e){
-      if(!wrapper.contains(e.relatedTarget)) dropOverlay.classList.remove('active');
-    });
-    wrapper.addEventListener('drop', async function(e){
-      e.preventDefault(); dropOverlay.classList.remove('active');
-      const file = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
-      if(file) await embedImage(ta, file);
-    });
-
-    // ── Pegar imágenes con Ctrl+V ─────────────────────────────────────
-    ta.addEventListener('paste', async function(e){
-      const imgItem = [...(e.clipboardData.items||[])].find(i => i.type.startsWith('image/'));
-      if(!imgItem) return; // texto normal → dejar que el browser lo maneje
-      e.preventDefault();
-      await embedImage(ta, imgItem.getAsFile());
-    });
-
     attachEditorEvents(ta);
-    wrapper.classList.remove('active'); // activateTab lo activa
+    wrapper.classList.remove('active');
     if(opts.makeActive !== false) activateTab(id);
     else buildTabsBar();
     if(tab.handle) persistOpenTabs();
@@ -2128,46 +2083,6 @@
   }
 
   // Convierte un File de imagen a base64 y lo inserta como sintaxis Markdown
-  async function embedImage(ta, file){
-    if(!file || !file.type.startsWith('image/')) return;
-    if(isLocked()){ showToast('Conecta una carpeta de guardado para insertar imágenes.'); return; }
-    // Aviso si la imagen es grande
-    if(file.size > 2*1024*1024){
-      const ok = await confirmModal(
-        'La imagen pesa '+Math.round(file.size/1024)+' KB. Las imágenes grandes se guardan como base64 dentro del archivo .md y pueden hacerlo muy pesado. ¿Continuar?',
-        { title: 'Imagen grande', confirmLabel: 'Insertar de todas formas' }
-      );
-      if(!ok) return;
-    }
-    showToast('Procesando imagen…');
-    const reader = new FileReader();
-    reader.onload = function(){
-      const dataUrl = reader.result;
-      const ext = file.name.split('.').pop() || 'png';
-      const altName = file.name.replace(/\.[^.]+$/, '') || 'imagen';
-      const mdImg = '\n!['+altName+']('+dataUrl+')\n';
-      const pos = ta.selectionStart;
-      ta.setRangeText(mdImg, pos, ta.selectionEnd, 'end');
-      refreshAll();
-      showToast('Imagen insertada ✓');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  // Abre el selector de archivo de imagen
-  const imageInput = document.getElementById('imageInput');
-  function insertImageCmd(){
-    const t = activeTab(); if(!t){ showToast('Abre una nota primero.'); return; }
-    if(isLocked()){ showToast('Conecta una carpeta de guardado primero.'); return; }
-    imageInput.value = '';
-    imageInput.click();
-  }
-  imageInput.addEventListener('change', async function(){
-    const file = imageInput.files[0]; if(!file) return;
-    const t = activeTab(); if(!t) return;
-    await embedImage(t.ta, file);
-  });
-
   const ACTIONS = {
     newTab, newWindow, open: openFile,
     save: () => saveTab(activeTab()), saveAs: () => saveTabAs(activeTab()), saveAll: saveAllTabs,
@@ -2177,8 +2092,7 @@
     find: () => toggleFindBar(true), findNext: () => searchDir(true), findPrev: () => searchDir(false),
     searchAll: searchAllNotes,
     replace: () => { toggleFindBar(true); toggleReplaceRow(true); }, goto: gotoLine,
-    selectAll: selectAllText, dateTime: insertDateTime,
-    insertImage: insertImageCmd
+    selectAll: selectAllText, dateTime: insertDateTime
   };
   document.querySelectorAll('.mi[data-action]').forEach(function(btn){
     btn.addEventListener('click', function(e){
@@ -2209,7 +2123,6 @@
     else if(ctrl && key === 'g'){ e.preventDefault(); gotoLine(); }
     else if(key === 'f5'){ e.preventDefault(); insertDateTime(); }
     else if(ctrl && e.shiftKey && key === 'p'){ e.preventDefault(); togglePreview(activeTab()); }
-    else if(ctrl && e.shiftKey && key === 'i'){ e.preventDefault(); insertImageCmd(); }
     else if(ctrl && key === 'b' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'bold'); } }
     else if(ctrl && key === 'i' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'italic'); } }
     else if(ctrl && key === 'tab'){ e.preventDefault(); cycleTab(e.shiftKey ? -1 : 1); }
