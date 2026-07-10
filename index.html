@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 6.8</title>
+<title>Editorium 7.1</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -18,17 +18,6 @@
     --fg-text:#1f2328; --fg-muted:#59636e; --accent:#0969da; --accent2:#cf222e;
     --border:#d0d7de; --selection:#b6e3ff; --caret:#0969da;
   }
-  html[data-theme="github-light"]{
-    --bg-main:#ffffff; --bg-toolbar:#f6f8fa; --bg-gutter:#f6f8fa; --bg-page:#c9d1d9;
-    --fg-text:#1f2328; --fg-muted:#59636e; --accent:#0969da; --accent2:#cf222e;
-    --border:#d0d7de; --selection:#b6e3ff; --caret:#0969da;
-  }
-  html[data-theme="github-dark"]{
-    --bg-main:#0d1117; --bg-toolbar:#161b22; --bg-gutter:#161b22; --bg-page:#010409;
-    --fg-text:#e6edf3; --fg-muted:#7d8590; --accent:#2f81f7; --accent2:#ff7b72;
-    --border:#30363d; --selection:#264f78; --caret:#2f81f7;
-  }
-
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
   body{
@@ -172,10 +161,6 @@
   .mi.disabled{color:var(--fg-muted);cursor:default;}
   .mi .kbd{color:var(--fg-muted);font-size:.7rem;margin-left:auto;}
   .mi:hover:not(.disabled) .kbd{color:var(--bg-main);opacity:.75;}
-  .theme-swatch{
-    width:14px;height:14px;border-radius:3px;flex-shrink:0;
-    border:1px solid rgba(0,0,0,.2);
-  }
   .mi-sep{height:1px;background:var(--border);margin:4px 3px;}
   .submenuwrap{position:relative;}
   .submenuwrap > .menu-dropdown.submenu{top:-4px;left:100%;min-width:200px;}
@@ -258,6 +243,23 @@
     padding:3px;flex-shrink:0;border-radius:4px;line-height:0;opacity:.6;
   }
   .notesPanel-trashBtn:hover{color:var(--danger);background:rgba(229,72,77,.10);opacity:1;}
+
+  .notesPanel-pinBtn{
+    background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
+    padding:3px;flex-shrink:0;border-radius:4px;line-height:0;opacity:.5;
+    transition:opacity .15s,color .15s;
+  }
+  .notesPanel-pinBtn:hover{opacity:1;color:var(--accent);}
+  .notesPanel-pinBtn.pinned{opacity:1;color:var(--accent);}
+
+  .notesPanel-section{
+    font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--fg-muted);padding:2px 2px 6px;margin-top:4px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .notesPanel-section::after{
+    content:'';flex:1;height:1px;background:var(--border);
+  }
 
   .notesPanel-empty{color:var(--fg-muted);font-size:.78rem;padding:7px 2px;line-height:1.6;}
   .notesPanel-empty button{
@@ -363,8 +365,6 @@
   .preview-pane .task-item{list-style:none;margin-left:-1.2em;}
   .preview-pane .task-item input{margin-right:.5em;}
 
-
-
   /* ---------- Buscar / Reemplazar ---------- */
   .findbar{
     display:flex;flex-direction:column;gap:5px;padding:6px 10px;
@@ -427,11 +427,6 @@
   .search-result:hover{background:var(--border);}
   .sr-name{font-size:.82rem;color:var(--accent);}
   .sr-snippet{font-size:.74rem;color:var(--fg-muted);margin-top:2px;line-height:1.4;}
-  .pinBtn{
-    background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
-    font-size:.8rem;padding:0 2px;flex-shrink:0;
-  }
-  .pinBtn.pinned{color:var(--save-alert);}
   .modal-box label{display:block;margin:10px 0 4px;color:var(--fg-muted);font-size:.78rem;}
   .modal-box select, .modal-box input{
     width:100%;background:var(--bg-main);color:var(--fg-text);
@@ -520,7 +515,6 @@
     <button type="button" id="connectBarBtn">Elegir carpeta…</button>
   </div>
   <div class="tabsbar" id="tabsbar"></div>
-  <button class="tabAdd hidden" id="dummy" style="display:none"></button>
 
   <nav class="menubar">
     <div class="menubar-sep"></div>
@@ -637,14 +631,14 @@
       <span id="statusWords">0 palabras</span>
       <span id="statusChars">0 caracteres</span>
       <span id="statusEncoding">UTF-8</span>
-      <button id="themeToggleBtn" title="Cambiar entre GitHub Light y Dark" style="background:none;border:none;cursor:pointer;color:var(--fg-muted);font-size:.74rem;font-family:inherit;padding:0;">GitHub Light</button>
+      <span id="statusScheme" style="display:none">GitHub Light</span>
       <span id="folderStatus"></span>
       <span id="locationWarning"></span>
     </div>
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V6.8.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V7.1.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -670,13 +664,10 @@
   const statusLeft = document.getElementById('statusLeft');
   const statusWords = document.getElementById('statusWords');
   const statusChars = document.getElementById('statusChars');
-  // statusScheme reemplazado por botón toggle en el statusbar
-  const themeToggleBtn = document.getElementById('themeToggleBtn');
   const notesPanel = document.getElementById('notesPanel');
   const notesPanelList = document.getElementById('notesPanelList');
   const recentSubmenu = document.getElementById('recentSubmenu');
   const fontMenuDropdown = document.getElementById('fontMenuDropdown');
-  // schemeMenuDropdown eliminado — menú Color reemplazado por toggle en statusbar
   const modalOverlay = document.getElementById('modalOverlay');
   const modalBox = document.getElementById('modalBox');
   const quickSaveBtn = document.getElementById('quickSaveBtn');
@@ -695,14 +686,9 @@
   const DOC_ICON_SVG = '<svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/></svg>';
 
   const supportsFSAccess = 'showOpenFilePicker' in window;
-  const THEMES = [
-    ['github-light','GitHub Light'],
-    ['github-dark','GitHub Dark']
-  ];
-  const THEME_SWATCH = {
-    'github-light': ['#ffffff', '#0969da'],
-    'github-dark':  ['#0d1117', '#2f81f7']
-  };
+  const THEMES = [['github-light','GitHub Light']];
+  const THEME_SWATCH = { 'github-light': ['#ffffff', '#0969da'] };
+  function setTheme(name){ document.documentElement.setAttribute('data-theme', name); }
 
   let tabs = [];        // {id, name, handle, ta, originalContent}
   let activeTabId = null;
@@ -943,6 +929,74 @@
     return 'Última edición: ' + when;
   }
 
+  // ============ Notas fijadas (máx. 3, persistidas en IndexedDB) ============
+  let pinnedNames = []; // array ordenado de nombres de archivo — máx. 3
+
+  async function loadPinnedNames(){
+    try{
+      const stored = await idbGet('pinnedNames');
+      if(Array.isArray(stored)) pinnedNames = stored;
+    }catch(e){}
+  }
+  async function savePinnedNames(){
+    try{ await idbSet('pinnedNames', pinnedNames); }catch(e){}
+  }
+  function togglePin(name){
+    const idx = pinnedNames.indexOf(name);
+    if(idx !== -1){
+      pinnedNames.splice(idx, 1);
+      savePinnedNames();
+      refreshNotesPanel();
+    } else {
+      if(pinnedNames.length >= 3){
+        showToast('Máximo 3 notas fijadas');
+        return;
+      }
+      pinnedNames.push(name);
+      savePinnedNames();
+      refreshNotesPanel();
+    }
+  }
+
+  // SVG del pin (chincheta): vacío = sin fijar, relleno = fijada
+  const PIN_ICON_SVG   = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 6.4L21 9.3l-4.9 4.8 1.2 6.9L12 18l-5.3 3 1.2-6.9L3 9.3l6.6-.9z"/></svg>';
+  const PIN_ICON_SOLID = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><path d="M12 2l2.4 6.4L21 9.3l-4.9 4.8 1.2 6.9L12 18l-5.3 3 1.2-6.9L3 9.3l6.6-.9z"/></svg>';
+
+  function buildNoteCard(item){
+    const isActive = tabs.some(t => t.id === activeTabId && t.name === item.name && t.handle);
+    const isPinned = pinnedNames.includes(item.name);
+    const card = document.createElement('div');
+    card.className = 'notesPanel-card' + (isActive ? ' active' : '') + (isPinned ? ' pinned-card' : '');
+    card.title = item.name;
+    card.innerHTML =
+      '<div class="notesPanel-cardTop">' +
+        '<span class="notesPanel-cardTitle">' + escapeHtml(item.name) + '</span>' +
+        '<button type="button" class="notesPanel-pinBtn' + (isPinned ? ' pinned' : '') + '" title="' + (isPinned ? 'Quitar pin' : 'Fijar nota') + '" aria-label="' + (isPinned ? 'Quitar pin' : 'Fijar nota') + '">' +
+          (isPinned ? PIN_ICON_SOLID : PIN_ICON_SVG) +
+        '</button>' +
+        '<button type="button" class="notesPanel-trashBtn" title="Eliminar nota" aria-label="Eliminar nota">' + TRASH_ICON_SVG + '</button>' +
+      '</div>' +
+      '<div class="notesPanel-cardSub">' + formatLastEdited(item.lastModified) + '</div>';
+    card.addEventListener('click', async function(){
+      const existing = tabs.find(t => t.name === item.name && t.handle);
+      if(existing){ activateTab(existing.id); return; }
+      try{
+        const file = await item.handle.getFile();
+        const text = await file.text();
+        createTab({ name: item.name, content: text, handle: item.handle });
+      }catch(e){ await alertModal('No se pudo abrir el archivo.'); }
+    });
+    card.querySelector('.notesPanel-pinBtn').addEventListener('click', function(e){
+      e.stopPropagation();
+      togglePin(item.name);
+    });
+    card.querySelector('.notesPanel-trashBtn').addEventListener('click', function(e){
+      e.stopPropagation();
+      deleteNote(item);
+    });
+    return card;
+  }
+
   async function refreshNotesPanel(){
     if(!saveDirHandle){
       notesPanelList.innerHTML =
@@ -958,92 +1012,53 @@
       for await (const [name, handle] of saveDirHandle.entries()){
         if(handle.kind !== 'file' || !/\.(txt|md|markdown)$/i.test(name)) continue;
         let lastModified = 0;
-        try{ const file = await handle.getFile(); lastModified = file.lastModified; }catch(e){ /* sin permiso para leerlo todavía */ }
+        try{ const file = await handle.getFile(); lastModified = file.lastModified; }catch(e){}
         items.push({ name, handle, lastModified });
       }
-    }catch(e){ /* la carpeta pudo cambiar de permisos */ }
-    if(notesSortMode === 'alpha'){
-      items.sort((a, b) => a.name.localeCompare(b.name, 'es'));
-    } else {
-      items.sort((a, b) => b.lastModified - a.lastModified);
-    }
+    }catch(e){}
     if(items.length === 0){
       notesPanelList.innerHTML = '<div class="notesPanel-empty">Esta carpeta todavía no tiene notas guardadas.</div>';
       return;
     }
-    notesPanelList.innerHTML = '';
-    items.forEach(function(item){
-      const isActive = tabs.some(t => t.id === activeTabId && t.name === item.name && t.handle);
-      const card = document.createElement('div');
-      card.className = 'notesPanel-card' + (isActive ? ' active' : '');
-      card.title = item.name;
-      card.innerHTML =
-        '<div class="notesPanel-cardTop">' +
-          '<span class="notesPanel-cardTitle">' + escapeHtml(item.name) + '</span>' +
-          '<button type="button" class="notesPanel-trashBtn" title="Eliminar nota" aria-label="Eliminar nota">' + TRASH_ICON_SVG + '</button>' +
-        '</div>' +
-        '<div class="notesPanel-cardSub">' + formatLastEdited(item.lastModified) + '</div>';
-      card.addEventListener('click', async function(){
-        const existing = tabs.find(t => t.name === item.name && t.handle);
-        if(existing){ activateTab(existing.id); return; }
-        try{
-          const file = await item.handle.getFile();
-          const text = await file.text();
-          createTab({ name: item.name, content: text, handle: item.handle });
-        }catch(e){ await alertModal('No se pudo abrir el archivo.'); }
-      });
-      card.querySelector('.notesPanel-trashBtn').addEventListener('click', function(e){
-        e.stopPropagation();
-        deleteNote(item);
-      });
-      notesPanelList.appendChild(card);
-    });
-  }
 
-  // Renombra una nota de verdad: crea el archivo con el nuevo nombre, copia
-  // el contenido, y borra el original — a diferencia de "Guardar como", que
-  // a propósito deja intacto el archivo original (igual que Word).
-  function renameNote(item){
-    openModal(
-      '<h3>Renombrar nota</h3><label>Nuevo nombre</label>' +
-      '<input type="text" id="renameInput" value="' + item.name.replace(/"/g,'&quot;') + '">' +
-      '<div class="modal-error" id="renameError"></div>' +
-      '<div class="modal-actions"><button data-modal-cancel>Cancelar</button><button data-modal-ok>Renombrar</button></div>',
-      async function(){
-        let newName = document.getElementById('renameInput').value.trim();
-        if(isGenericName(newName)){
-          document.getElementById('renameError').textContent = 'Escribe un nombre específico — "nota" no vale.';
-          return false;
-        }
-        if(!/\.[a-zA-Z0-9]+$/.test(newName)) newName += '.txt';
-        if(newName === item.name) return true;
-        let exists = false;
-        try{ await saveDirHandle.getFileHandle(newName); exists = true; }catch(e){ exists = false; }
-        if(exists){
-          document.getElementById('renameError').textContent = 'Ya existe una nota con este nombre.';
-          return false;
-        }
-        try{
-          const file = await item.handle.getFile();
-          const text = await file.text();
-          const newHandle = await saveDirHandle.getFileHandle(newName, { create: true });
-          const writable = await newHandle.createWritable();
-          await writable.write(text);
-          await writable.close();
-          await saveDirHandle.removeEntry(item.name);
-          const openTab = tabs.find(t => t.name === item.name && t.handle);
-          if(openTab){ openTab.handle = newHandle; openTab.name = newName; buildTabsBar(); persistOpenTabs(); }
-          recentFiles = recentFiles.filter(r => r.name !== item.name);
-          persistRecent();
-          showToast('Nota renombrada ✓');
-          refreshNotesPanel();
-          return true;
-        }catch(err){
-          document.getElementById('renameError').textContent = 'No se pudo renombrar: ' + err.message;
-          return false;
-        }
+    // Limpia pins de notas que ya no existen en disco
+    const existingNames = new Set(items.map(i => i.name));
+    const validPins = pinnedNames.filter(n => existingNames.has(n));
+    if(validPins.length !== pinnedNames.length){
+      pinnedNames = validPins;
+      savePinnedNames();
+    }
+
+    // Separa fijadas y el resto
+    const pinned  = pinnedNames.map(n => items.find(i => i.name === n)).filter(Boolean);
+    const rest    = items.filter(i => !pinnedNames.includes(i.name));
+
+    // Ordena el resto según el modo activo
+    if(notesSortMode === 'alpha'){
+      rest.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+    } else {
+      rest.sort((a, b) => b.lastModified - a.lastModified);
+    }
+
+    notesPanelList.innerHTML = '';
+
+    if(pinned.length > 0){
+      const secPin = document.createElement('div');
+      secPin.className = 'notesPanel-section';
+      secPin.textContent = 'Fijadas';
+      notesPanelList.appendChild(secPin);
+      pinned.forEach(item => notesPanelList.appendChild(buildNoteCard(item)));
+    }
+
+    if(rest.length > 0){
+      if(pinned.length > 0){
+        const secAll = document.createElement('div');
+        secAll.className = 'notesPanel-section';
+        secAll.textContent = 'Todas';
+        notesPanelList.appendChild(secAll);
       }
-    );
+      rest.forEach(item => notesPanelList.appendChild(buildNoteCard(item)));
+    }
   }
 
   // Borra una nota de la carpeta fija (y cierra su pestaña si estaba abierta).
@@ -1063,6 +1078,11 @@
       if(openTab) closeTab(openTab.id, true);
       recentFiles = recentFiles.filter(r => r.name !== item.name);
       persistRecent();
+      // quitar del panel de fijadas si estaba ahí
+      if(pinnedNames.includes(item.name)){
+        pinnedNames = pinnedNames.filter(n => n !== item.name);
+        savePinnedNames();
+      }
       refreshNotesPanel();
       const noteName = item.name;
       showToast('Nota eliminada', async function(){
@@ -1160,22 +1180,15 @@
 
   function buildTabsBar(){
     tabsbar.innerHTML = '';
-    const sorted = [...tabs].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
-    sorted.forEach(t => {
+    tabs.forEach(t => {
       const pill = document.createElement('div');
       pill.className = 'tabpill' + (t.id === activeTabId ? ' active' : '');
       pill.innerHTML =
-        '<button class="pinBtn' + (t.pinned ? ' pinned' : '') + '" title="' + (t.pinned ? 'Quitar de fijados' : 'Fijar nota') + '" aria-label="' + (t.pinned ? 'Quitar de fijados' : 'Fijar nota') + '">' +
-          (t.pinned ? '★' : '☆') +
-        '</button>' +
         '<span class="ficon"></span>' +
         '<span class="tname">' + escapeHtml(t.name) + '</span>' +
         (isDirty(t) ? '<span class="dirty">●</span>' : '') +
         '<button class="tclose" title="Cerrar" aria-label="Cerrar pestaña">✕</button>';
       pill.addEventListener('click', () => activateTab(t.id));
-      pill.querySelector('.pinBtn').addEventListener('click', (e) => {
-        e.stopPropagation(); t.pinned = !t.pinned; buildTabsBar();
-      });
       pill.querySelector('.tname').title = 'Doble clic para guardar con otro nombre';
       pill.querySelector('.tname').addEventListener('dblclick', (e) => {
         e.stopPropagation(); saveTabAs(t);
@@ -1226,7 +1239,7 @@
     const tab = {
       id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
       ta, preview, wrapper, originalContent: opts.content || '',
-      pinned: false, previewMode: false
+      previewMode: false
     };
     tabs.push(tab);
 
@@ -1830,16 +1843,6 @@
     });
   }
 
-  function setTheme(name){
-    document.documentElement.setAttribute('data-theme', name);
-    const found = THEMES.find(p => p[0] === name);
-    if(themeToggleBtn) themeToggleBtn.textContent = found ? found[1] : name;
-  }
-  function toggleTheme(){
-    const current = document.documentElement.getAttribute('data-theme') || 'github-light';
-    setTheme(current === 'github-light' ? 'github-dark' : 'github-light');
-  }
-  if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
   function buildRecentMenu(){
     if(!supportsFSAccess){
@@ -2166,6 +2169,7 @@
   syncFolderStatus();
   restoreSaveFolder();
   restoreRecentFiles();
+  loadPinnedNames();
 })();
 </script>
 </body>
