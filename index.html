@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 8.1</title>
+<title>Editorium 8.2</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -84,14 +84,14 @@
   /* Estado normal — texto e icono en gris GitHub */
   .saveBtn.clean{ color:var(--fg-muted); }
 
-  /* Estado alerta — rojo GitHub, texto e icono en blanco (currentColor los hereda) */
+  /* Estado alerta — púrpura GitHub, texto e icono en blanco (currentColor los hereda) */
   .saveBtn.dirty{
-    background:#cf222e;
+    background:#8250df;
     color:#ffffff;
     font-weight:800;
     box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);
   }
-  .saveBtn.dirty:hover{ background:#a40e26; }
+  .saveBtn.dirty:hover{ background:#6639ba; }
 
   /* ---------- Aviso flotante (toast) ---------- */
   .toast{
@@ -549,7 +549,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v8.1</span>
+    <span class="app-header-badge" id="appVersionBadge">v8.2</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -687,7 +687,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V8.1.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V8.2.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
