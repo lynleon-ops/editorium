@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 8.6</title>
+<title>Editorium 8.8</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -281,9 +281,9 @@
     padding:4px 10px;font-size:.76rem;cursor:pointer;font-weight:600;
   }
 
-  /* ---------- Área de edición — columna de escritura centrada ---------- */
-  .workspace{flex:1;display:flex;min-height:0;background:#f0f2f4;}
-  .editorstack{flex:1;min-width:0;position:relative;overflow-y:auto;background:#f0f2f4;}
+  /* ---------- Área de edición — folio de papel centrado ---------- */
+  .workspace{flex:1;display:flex;min-height:0;}
+  .editorstack{flex:1;min-width:0;position:relative;background:#eef0f3;overflow:hidden;}
   .editorEmpty{
     display:none;height:100%;flex-direction:column;align-items:center;justify-content:center;
     gap:10px;color:var(--fg-muted);text-align:center;padding:40px;
@@ -295,26 +295,40 @@
     background:var(--accent);color:var(--bg-main);border:none;border-radius:8px;
     padding:8px 18px;font-size:.82rem;cursor:pointer;font-weight:600;
   }
-  /* Wrapper que centra el textarea como un folio de papel */
+  /* ---------- Wrapper por pestaña — fondo gris escritorio ---------- */
+  .tab-wrapper{
+    display:none;flex-direction:column;width:100%;height:100%;position:relative;
+  }
   .tab-wrapper.active{
     display:flex;flex-direction:column;
-    align-items:center;padding:32px 24px 48px;
-    min-height:100%;
+    align-items:center;padding:16px 14px 24px;
+    overflow-y:auto;background:#eef0f3;
   }
-  textarea.editor{
-    display:none;
+
+  /* ── Folio de papel ── */
+  .editor-folio{
     width:100%;max-width:960px;
-    min-height:calc(100vh - 260px);
-    background:#ffffff;color:#1f2328;border:none;outline:none;
-    resize:none;padding:40px 48px;
+    background:#ffffff;border:1px solid #d0d7de;border-radius:8px;
+    padding:28px 32px 32px;
+    box-shadow:0 2px 6px rgba(0,0,0,.07), 0 6px 20px rgba(0,0,0,.05);
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .editor-folio-title{
+    font-size:.68rem;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:#cf222e;
+  }
+
+  textarea.editor{
+    display:block;
+    width:100%;
+    min-height:calc(100vh - 320px);
+    background:#ffffff;color:#1f2328;
+    border:1px solid #ccdcef;border-radius:4px;outline:none;
+    resize:none;padding:16px 18px;
     font-size:var(--editor-font-size);line-height:1.75;tab-size:4;
     font-family:var(--editor-font-family);
-    caret-color:var(--caret);white-space:pre-wrap;
-    overflow:visible;
-    border-radius:4px;
-    box-shadow:0 1px 4px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+    caret-color:var(--caret);white-space:pre-wrap;overflow:auto;
   }
-  textarea.editor.active{display:block;}
   textarea.editor::selection{background:var(--selection-bg);color:var(--selection-fg);}
   textarea.editor::placeholder{color:#adb5bd;}
   @keyframes searchFlash{
@@ -323,20 +337,13 @@
   }
   textarea.editor.flash{animation:searchFlash .5s ease-out;}
 
-  /* ---------- Wrapper por pestaña (agrupa toolbar + editor/preview) ---------- */
-  .tab-wrapper{
-    display:none;flex-direction:column;width:100%;height:100%;position:relative;
-  }
-  .tab-wrapper.active{ display:flex; }
-
   .preview-pane{
-    display:none;width:100%;max-width:960px;
-    min-height:calc(100vh - 260px);
-    padding:40px 48px;background:#ffffff;color:var(--fg-text);
+    display:none;width:100%;
+    min-height:calc(100vh - 320px);
+    padding:16px 18px;background:#ffffff;color:var(--fg-text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
     font-size:16px;line-height:1.75;
-    border-radius:4px;
-    box-shadow:0 1px 4px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+    border:1px solid #ccdcef;border-radius:4px;
   }
   .preview-pane.active{ display:block; }
 
@@ -539,7 +546,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v8.6</span>
+    <span class="app-header-badge" id="appVersionBadge">v8.8</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -694,7 +701,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V8.6.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V8.8.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -1253,37 +1260,52 @@
     return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
+  function noteDisplayName(name){
+    return name.replace(/\.(txt|md|markdown)$/i, '');
+  }
+
   function createTab(opts){
     opts = opts || {};
     const id = 'tab' + (++tabCounter);
 
-    // ── Wrapper que agrupa toolbar + editor + preview ──────────────────
+    // ── Wrapper (fondo gris escritorio, centra el folio) ───────────────
     const wrapper = document.createElement('div');
     wrapper.className = 'tab-wrapper';
     wrapper.dataset.tabId = id;
 
+    // ── Folio de papel (card blanco) ───────────────────────────────────
+    const folio = document.createElement('div');
+    folio.className = 'editor-folio';
+
+    // Título en rojo — nombre de la nota sin extensión
+    const folioTitle = document.createElement('div');
+    folioTitle.className = 'editor-folio-title';
+    folioTitle.textContent = noteDisplayName(opts.name || 'sin-título');
+    folio.appendChild(folioTitle);
+
     // ── Textarea ───────────────────────────────────────────────────────
     const ta = document.createElement('textarea');
-    ta.className = 'editor active';
+    ta.className = 'editor';
     ta.spellcheck = true;
     ta.lang = 'es';
     ta.readOnly = isLocked();
     ta.placeholder = isLocked()
-      ? 'Conecta una carpeta de guardado (Archivo → Carpeta de guardado…) para empezar a escribir.'
+      ? 'Conecta una carpeta de guardado para empezar a escribir.'
       : 'Escribe tu nota aquí… (soporta Markdown)';
     ta.value = opts.content || '';
-    wrapper.appendChild(ta);
+    folio.appendChild(ta);
 
     // ── Preview pane ──────────────────────────────────────────────────
     const preview = document.createElement('div');
     preview.className = 'preview-pane';
-    wrapper.appendChild(preview);
+    folio.appendChild(preview);
 
+    wrapper.appendChild(folio);
     editorstack.appendChild(wrapper);
 
     const tab = {
       id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
-      ta, preview, wrapper, originalContent: opts.content || '',
+      ta, preview, wrapper, folio, folioTitle, originalContent: opts.content || '',
       previewMode: false
     };
     tabs.push(tab);
@@ -1564,6 +1586,7 @@
       await writable.close();
       tab.handle = handle;
       tab.name = name;
+      if(tab.folioTitle) tab.folioTitle.textContent = noteDisplayName(name);
       tab.originalContent = tab.ta.value;
       addRecent(tab.name, handle);
       persistOpenTabs();
@@ -1598,6 +1621,7 @@
         tab.handle = handle;
         const file = await handle.getFile();
         tab.name = file.name;
+        if(tab.folioTitle) tab.folioTitle.textContent = noteDisplayName(tab.name);
         tab.originalContent = tab.ta.value;
         addRecent(tab.name, handle);
         refreshAll();
