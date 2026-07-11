@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 8.4</title>
+<title>Editorium 8.6</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -181,49 +181,35 @@
   .notesPanel{
     width:240px;flex-shrink:0;
     background:#f8f9fa;border-right:1px solid var(--border);
-    display:flex;flex-direction:column;
+    display:flex;flex-direction:column;overflow:hidden;
   }
-  .notesPanel-inner{width:240px;height:100%;overflow-y:auto;padding:14px 12px;}
 
-  /* Botón nueva nota — grande, uppercase, prominente */
-  .notesPanel-newBtn{
-    display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
-    background:var(--bg-main);border:1.5px solid var(--border);border-radius:8px;
-    color:var(--fg-text);padding:11px 14px;font-size:.78rem;font-weight:700;
-    cursor:pointer;margin-bottom:18px;letter-spacing:.05em;text-transform:uppercase;
-    box-shadow:0 1px 4px rgba(0,0,0,.08);transition:border-color .15s,box-shadow .15s;
+  /* Botón directo en toolbar (sin dropdown) */
+  .toolbar-btn{
+    background:transparent;border:none;color:var(--fg-muted);
+    cursor:pointer;border-radius:4px;margin:4px 1px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:6px 12px;min-width:46px;font-weight:600;
+    font-size:.6rem;text-transform:uppercase;letter-spacing:.04em;
+    transition:background .12s,color .12s;
   }
-  .notesPanel-newBtn svg{flex-shrink:0;}
-  .notesPanel-newBtn:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.14);}
+  .toolbar-btn svg{width:18px;height:18px;flex-shrink:0;}
+  .toolbar-btn:hover{background:var(--border);color:var(--fg-text);}
+  .toolbar-btn.t-active{background:var(--accent);color:#ffffff;}
+  .toolbar-btn.t-active:hover{background:#0860c4;}
 
-  /* Cabecera "MIS NOTAS" + lupa en línea */
-  .notesPanel-header{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 2px 8px;
+  /* ---------- Panel de notas — solo lista ---------- */
+  .notesPanel-label{
+    font-size:.59rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--fg-muted);padding:12px 14px 6px;flex-shrink:0;border-bottom:1px solid var(--border);
+    margin-bottom:6px;
   }
-  .notesPanel-headerLabel{
-    font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--fg-muted);
+  .notesPanel-scroll{
+    flex:1;overflow-y:auto;padding:6px 10px 14px;
   }
-  .notesPanel-searchBtn{
-    background:transparent;border:none;color:var(--fg-muted);cursor:pointer;
-    padding:3px;border-radius:4px;line-height:0;
-  }
-  .notesPanel-searchBtn:hover{color:var(--accent);background:rgba(127,127,127,.12);}
-
-  /* Fila de ordenamiento: FECHA + A-Z */
-  .notesPanel-sortRow{display:flex;gap:6px;margin-bottom:14px;}
-  .notesPanel-sortBtn{
-    flex:1;background:transparent;border:1.5px solid var(--border);border-radius:2px;
-    color:var(--fg-muted);font-size:.66rem;padding:5px 8px;cursor:pointer;
-    text-transform:uppercase;letter-spacing:.04em;font-weight:700;
-    transition:all .12s;
-  }
-  .notesPanel-sortBtn:hover{border-color:var(--accent);color:var(--accent);}
-  .notesPanel-sortBtn.active{
-    background:var(--accent);border-color:var(--accent);
-    color:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,.18);
-  }
+  .notesPanel-scroll::-webkit-scrollbar{width:3px;}
+  .notesPanel-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .notesPanel-scroll::-webkit-scrollbar-track{background:transparent;}
 
   /* Cards de nota */
   .notesPanel-card{
@@ -553,7 +539,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v8.4</span>
+    <span class="app-header-badge" id="appVersionBadge">v8.6</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -621,6 +607,38 @@
       <div class="menu-dropdown dd-right" id="fontMenuDropdown"></div>
     </div>
 
+    <div class="menubar-sep"></div>
+
+    <!-- Botones directos: Nueva nota · Buscar -->
+    <button type="button" class="toolbar-btn" id="tbNewNote" title="Nueva nota (Ctrl+N)" aria-label="Nueva nota">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+      <span class="menu-label">Nueva</span>
+    </button>
+    <button type="button" class="toolbar-btn" id="tbSearch" title="Buscar en todas las notas" aria-label="Buscar nota">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="menu-label">Buscar</span>
+    </button>
+
+    <div class="menubar-sep"></div>
+
+    <!-- Sort toggle: Fecha / A-Z -->
+    <button type="button" class="toolbar-btn t-active" id="tbSortDate" title="Ordenar por fecha" aria-label="Ordenar por fecha">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+      <span class="menu-label">Fecha</span>
+    </button>
+    <button type="button" class="toolbar-btn" id="tbSortAlpha" title="Ordenar A-Z" aria-label="Ordenar A-Z">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="11" y2="6"/><line x1="4" y1="12" x2="11" y2="12"/><line x1="4" y1="18" x2="13" y2="18"/><polyline points="15 9 18 6 21 9"/><line x1="18" y1="6" x2="18" y2="18"/></svg>
+      <span class="menu-label">A-Z</span>
+    </button>
+
+    <div class="menubar-sep"></div>
+
+    <!-- Carpeta -->
+    <button type="button" class="toolbar-btn" id="tbFolder" title="Elegir carpeta de guardado" aria-label="Elegir carpeta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16.5z"/></svg>
+      <span class="menu-label">Carpeta</span>
+    </button>
+
     <div class="menubar-sep push"></div>
     <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)" aria-label="Guardar">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -634,23 +652,8 @@
 
   <main class="workspace">
     <aside class="notesPanel" id="notesPanel">
-      <div class="notesPanel-inner">
-        <button type="button" class="notesPanel-newBtn" id="notesPanelNewBtn">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/><circle cx="18.5" cy="18.5" r="3.6" fill="#2f9e44"/><path d="M18.5 16.8v3.4M16.8 18.5h3.4" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/></svg>
-          Nueva nota
-        </button>
-        <div class="notesPanel-header">
-          <span class="notesPanel-headerLabel">Mis notas</span>
-          <button type="button" class="notesPanel-searchBtn" id="notesPanelSearchBtn" title="Buscar en todas las notas" aria-label="Buscar en todas las notas">
-            <svg viewBox="0 0 24 24" width="14" height="14"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <div class="notesPanel-sortRow" id="notesPanelSortRow">
-          <button type="button" class="notesPanel-sortBtn active" data-sort="date">Fecha</button>
-          <button type="button" class="notesPanel-sortBtn" data-sort="alpha">A-Z</button>
-        </div>
-        <div id="notesPanelList"></div>
-      </div>
+      <div class="notesPanel-label">Mis notas</div>
+      <div class="notesPanel-scroll" id="notesPanelList"></div>
     </aside>
     <div class="editorstack" id="editorstack">
       <div class="editorEmpty" id="editorEmpty">
@@ -691,7 +694,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V8.4.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V8.6.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -731,8 +734,6 @@
   const reconnectDismiss = document.getElementById('reconnectDismiss');
   const connectBar = document.getElementById('connectBar');
   const connectBarBtn = document.getElementById('connectBarBtn');
-  const notesPanelNewBtn = document.getElementById('notesPanelNewBtn');
-  const notesPanelSearchBtn = document.getElementById('notesPanelSearchBtn');
 
   const TRASH_ICON_SVG = '<svg viewBox="0 0 24 24" width="15" height="15"><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" fill="none" stroke="#9aa3ad" stroke-width="1.4"></path><path d="M4 6h16l-1.2 14.2A2 2 0 0 1 16.8 22H7.2a2 2 0 0 1-2-1.8z" fill="#e5484d"></path><line x1="3" y1="6" x2="21" y2="6" stroke="#9aa3ad" stroke-width="1.6" stroke-linecap="round"></line><line x1="10" y1="10" x2="10" y2="17" stroke="#ffffff" stroke-width="1.1"></line><line x1="14" y1="10" x2="14" y2="17" stroke="#ffffff" stroke-width="1.1"></line></svg>';
   const DOC_ICON_SVG = '<svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/></svg>';
@@ -948,19 +949,24 @@
   connectBarBtn.addEventListener('click', chooseSaveFolder);
 
   // ============ Panel de todas mis notas ============
-  const notesPanelOpen = true; // panel siempre fijo y visible
-  let notesSortMode = 'date'; // 'date' (más reciente primero) o 'alpha' (A-Z)
-  const notesPanelSortRow = document.getElementById('notesPanelSortRow');
+  const notesPanelOpen = true;
+  let notesSortMode = 'date';
 
-  notesPanelNewBtn.addEventListener('click', newTab);
-  notesPanelSearchBtn.addEventListener('click', searchAllNotes);
-  notesPanelSortRow.addEventListener('click', function(e){
-    const btn = e.target.closest('[data-sort]');
-    if(!btn) return;
-    notesSortMode = btn.getAttribute('data-sort');
-    notesPanelSortRow.querySelectorAll('.notesPanel-sortBtn').forEach(b => b.classList.toggle('active', b === btn));
+  // Botones del Ribbon
+  document.getElementById('tbNewNote').addEventListener('click', newTab);
+  document.getElementById('tbSearch').addEventListener('click', searchAllNotes);
+  document.getElementById('tbFolder').addEventListener('click', chooseSaveFolder);
+
+  const tbSortDate  = document.getElementById('tbSortDate');
+  const tbSortAlpha = document.getElementById('tbSortAlpha');
+  function setSortMode(mode){
+    notesSortMode = mode;
+    tbSortDate.classList.toggle('t-active', mode === 'date');
+    tbSortAlpha.classList.toggle('t-active', mode === 'alpha');
     refreshNotesPanel();
-  });
+  }
+  tbSortDate.addEventListener('click',  () => setSortMode('date'));
+  tbSortAlpha.addEventListener('click', () => setSortMode('alpha'));
 
   function formatLastEdited(ts){
     if(!ts) return 'Última edición: —';
@@ -1066,11 +1072,7 @@
 
   async function refreshNotesPanel(){
     if(!saveDirHandle){
-      notesPanelList.innerHTML =
-        '<div class="notesPanel-empty">Configura una carpeta de guardado para ver aquí todas tus notas.' +
-        '<button type="button" id="notesPanelConfigBtn">Elegir carpeta…</button></div>';
-      const btn = document.getElementById('notesPanelConfigBtn');
-      if(btn) btn.addEventListener('click', chooseSaveFolder);
+      notesPanelList.innerHTML = '';
       return;
     }
     notesPanelList.innerHTML = '<div class="notesPanel-empty">Cargando…</div>';
