@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 8.8</title>
+<title>Editorium 9.1</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -301,17 +301,18 @@
   }
   .tab-wrapper.active{
     display:flex;flex-direction:column;
-    align-items:center;padding:16px 14px 24px;
+    padding:12px;
     overflow-y:auto;background:#eef0f3;
   }
 
   /* ── Folio de papel ── */
   .editor-folio{
-    width:100%;max-width:960px;
-    background:#ffffff;border:1px solid #d0d7de;border-radius:8px;
+    width:100%;
+    background:#ffffff;border:1px solid #d0d7de;border-radius:4px;
     padding:28px 32px 32px;
     box-shadow:0 2px 6px rgba(0,0,0,.07), 0 6px 20px rgba(0,0,0,.05);
     display:flex;flex-direction:column;gap:16px;
+    flex:1;
   }
   .editor-folio-title{
     font-size:.68rem;font-weight:700;letter-spacing:.12em;
@@ -546,7 +547,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v8.8</span>
+    <span class="app-header-badge" id="appVersionBadge">v9.1</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -701,7 +702,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V8.8.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.1.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
