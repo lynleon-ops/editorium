@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 8.0</title>
+<title>Editorium 8.1</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -81,18 +81,16 @@
   .saveBtn svg{flex-shrink:0;}
   .saveBtn:hover{background:var(--border);}
 
-  /* Estado normal — texto gris, disquete en sus colores originales */
+  /* Estado normal — texto e icono en gris GitHub */
   .saveBtn.clean{ color:var(--fg-muted); }
-  .saveBtn.clean svg{ opacity:.7; }
 
-  /* Estado alerta — fondo rojo, texto e icono en blanco mediante filtro */
+  /* Estado alerta — rojo GitHub, texto e icono en blanco (currentColor los hereda) */
   .saveBtn.dirty{
     background:#cf222e;
     color:#ffffff;
     font-weight:800;
     box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);
   }
-  .saveBtn.dirty svg{ filter:brightness(0) invert(1); }
   .saveBtn.dirty:hover{ background:#a40e26; }
 
   /* ---------- Aviso flotante (toast) ---------- */
@@ -551,7 +549,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v8.0</span>
+    <span class="app-header-badge" id="appVersionBadge">v8.1</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -621,7 +619,11 @@
 
     <div class="menubar-sep push"></div>
     <button class="saveBtn clean" id="quickSaveBtn" title="Guardar (Ctrl+S)" aria-label="Guardar">
-      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
       <span class="menu-label">Guardar</span>
     </button>
   </nav>
@@ -685,7 +687,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V8.0.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V8.1.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
