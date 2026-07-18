@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 9.2</title>
+<title>Editorium 9.3</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -547,7 +547,7 @@
         <span class="app-header-tagline">Editor de notas local</span>
       </div>
     </div>
-    <span class="app-header-badge" id="appVersionBadge">v9.2</span>
+    <span class="app-header-badge" id="appVersionBadge">v9.3</span>
   </header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
@@ -706,7 +706,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V9.2.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.3.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -1050,6 +1050,8 @@
       if(words > 0) wordBadge = ' · ' + words.toLocaleString('es') + ' pal.';
     }
     const card = document.createElement('div');
+    card.dataset.noteName = item.name;
+    card.dataset.lastModified = item.lastModified;
     card.className = 'notesPanel-card' +
       (isActive ? ' active' : '') +
       (isDirtyNote ? ' dirty-card' : '');
@@ -1088,7 +1090,12 @@
       notesPanelList.innerHTML = '';
       return;
     }
-    notesPanelList.innerHTML = '<div class="notesPanel-empty">Cargando…</div>';
+    const prevScroll = notesPanelList.scrollTop;
+    // Solo mostrar "Cargando…" si el panel aún está vacío; si ya hay
+    // tarjetas, se reconstruye silenciosamente para evitar parpadeo
+    if(!notesPanelList.querySelector('.notesPanel-card')){
+      notesPanelList.innerHTML = '<div class="notesPanel-empty">Cargando…</div>';
+    }
     const items = [];
     try{
       for await (const [name, handle] of saveDirHandle.entries()){
@@ -1141,6 +1148,8 @@
       }
       rest.forEach(item => notesPanelList.appendChild(buildNoteCard(item)));
     }
+
+    notesPanelList.scrollTop = prevScroll;
   }
 
   // Borra una nota de la carpeta fija (y cierra su pestaña si estaba abierta).
@@ -1435,8 +1444,30 @@
     updateCounts(); updateCursorStatus();
     syncQuickSave();
     editorEmpty.classList.toggle('show', tabs.length === 0);
-    // Refresca el panel para actualizar indicadores de cambios sin guardar
-    if(notesPanelOpen) refreshNotesPanel();
+    // Actualiza indicadores del panel EN SITIO — reconstruirlo entero en
+    // cada tecla producía saltos y parpadeo al escribir (bug v9.2)
+    if(notesPanelOpen) updateNotesPanelIndicators();
+  }
+
+  // Actualiza en sitio las tarjetas existentes (activa, cambios sin guardar,
+  // contador de palabras) sin tocar el DOM estructural ni releer el disco.
+  function updateNotesPanelIndicators(){
+    notesPanelList.querySelectorAll('.notesPanel-card').forEach(function(card){
+      const name = card.dataset.noteName;
+      if(!name) return;
+      const openTab = tabs.find(t => t.name === name && t.handle);
+      card.classList.toggle('active', !!(openTab && openTab.id === activeTabId));
+      card.classList.toggle('dirty-card', !!(openTab && isDirty(openTab)));
+      const sub = card.querySelector('.notesPanel-cardSub');
+      if(sub){
+        let wordBadge = '';
+        if(openTab){
+          const words = openTab.ta.value.trim().split(/\s+/).filter(Boolean).length;
+          if(words > 0) wordBadge = ' · ' + words.toLocaleString('es') + ' pal.';
+        }
+        sub.textContent = formatLastEdited(Number(card.dataset.lastModified) || 0) + wordBadge;
+      }
+    });
   }
 
   // ============ Archivo ============
@@ -1479,6 +1510,7 @@
         await writable.close();
         tab.originalContent = tab.ta.value;
         refreshAll();
+        if(notesPanelOpen) refreshNotesPanel(); // actualiza "Última edición"
         showToast('Guardado ✓');
         syncLocationWarning();
       }catch(err){ showToast('Error al guardar'); await alertModal('No se pudo guardar: ' + err.message); }
