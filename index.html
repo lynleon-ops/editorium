@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 9.4</title>
+<title>Editorium 9.7</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -39,23 +39,34 @@
     box-shadow:0 30px 70px rgba(0,0,0,.5);overflow:hidden;
   }
 
-  /* ---------- Header editorial inspirado en la referencia ---------- */
+  /* ---------- Header con logo ---------- */
   .app-header{
     display:flex;align-items:center;gap:14px;
-    background:#fff;border-top:3px solid #0969ef;border-bottom:1px solid #cfd8e3;
-    min-height:67px;padding:8px 20px 9px;flex-shrink:0;user-select:none;
+    background:#166534;
+    padding:11px 20px;flex-shrink:0;user-select:none;
   }
-  .app-header-logo{display:flex;align-items:center;min-width:0;}
-  .app-header-wordmark{display:flex;flex-direction:column;gap:3px;}
+  .app-header-logo{
+    display:flex;align-items:center;gap:11px;
+  }
+  .app-header-logomark{
+    width:36px;height:36px;flex-shrink:0;
+    background:rgba(255,255,255,.15);border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,255,255,.2);
+  }
+  .app-header-wordmark{
+    display:flex;flex-direction:column;line-height:1.2;
+  }
   .app-header-name{
-    margin:0;font-family:"Times New Roman",Times,serif;
-    font-size:30px;line-height:1.1;font-weight:400;color:#24292f;
-    letter-spacing:8px;white-space:nowrap;
+    font-size:1.05rem;font-weight:700;color:#ffffff;letter-spacing:-.01em;
   }
-  .app-header-name-accent{color:#0969ef;}
   .app-header-tagline{
-    font-size:8px;line-height:1.4;color:#475569;letter-spacing:3.5px;
-    text-transform:uppercase;font-weight:500;
+    font-size:.58rem;color:rgba(255,255,255,.65);letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+  }
+  .app-header-badge{
+    margin-left:auto;font-size:.58rem;font-weight:600;letter-spacing:.06em;
+    color:rgba(255,255,255,.7);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+    border-radius:12px;padding:2px 9px;text-transform:uppercase;
   }
 
   /* ---------- Botón Guardar ---------- */
@@ -507,34 +518,67 @@
     .modal-box.wide{ min-width:0; width:92vw; max-width:360px; }
   }
 
-  /* Barra horizontal con separadores finos y selección azul suave. */
+  /* Cabecera editorial y controles inspirados en los editores de escritorio. */
   body{padding-top:4px;background:#e9edf2;}
   .app-shell{box-shadow:none;}
-  .menubar{background:#fff;min-height:45px;padding:0 10px;flex-wrap:wrap;}
-  .menu-btn,.toolbar-btn,.saveBtn{
-    flex-direction:row;gap:8px;min-height:34px;min-width:0;
-    padding:7px 12px;margin:5px 0;border-radius:0;
-    font-size:11px;line-height:1.2;font-weight:600;
-    text-transform:none;letter-spacing:.35px;color:#596574;
+  .app-header{background:#fff;border-top:3px solid #0969ef;border-bottom:1px solid #d0d7de;min-height:67px;padding:8px 20px 9px;}
+  .app-header-wordmark{gap:3px;}
+  .app-header-name{margin:0;font-family:"Times New Roman",Times,serif;font-size:30px;line-height:1.1;font-weight:400;color:#24292f;letter-spacing:8px;}
+  .app-header-name span{color:#0969ef;}
+  .app-header-tagline{display:block;font-size:8px;color:#475569;letter-spacing:3.5px;line-height:1.4;}
+  .menubar{background:#fff;gap:3px;align-items:center;flex-wrap:wrap;padding:6px 12px;border-bottom:1px solid #dce2e9;min-height:49px;}
+  .menu-btn,.toolbar-btn,.saveBtn{display:flex;flex-direction:row;gap:7px;min-width:0;min-height:34px;padding:8px 10px;margin:0;border-radius:6px;font-size:12px;line-height:1.2;font-weight:500;text-transform:none;letter-spacing:0;color:#475569;}
+  .menu-btn svg,.toolbar-btn svg,.saveBtn svg{width:16px;height:16px;}
+  .menu-btn>svg{display:none;}
+  .menu-btn:hover,.menu.open>.menu-btn,.toolbar-btn:hover,.saveBtn.clean:hover{background:#f0f3f7;border-radius:6px;color:#172b4d;}
+  .toolbar-btn.t-active,.toolbar-btn.t-active:hover{background:#eaf2ff;color:#0969da;}
+  .saveBtn.dirty{background:#0969da;color:white;font-weight:600;}
+  .saveBtn.dirty:hover{background:#0757b5;}
+  #tbNewNote{margin-left:8px;}
+  #quickSaveBtn{margin-left:auto;}
+  #tbFolder .menu-label{display:inline;}
+  @keyframes folderAttention{
+    0%,100%{background:#fff1f2;color:#b42318;box-shadow:inset 0 0 0 1px #fda4af;}
+    50%{background:#b42318;color:#fff;box-shadow:inset 0 0 0 1px #b42318;}
   }
-  .menu-btn svg,.toolbar-btn svg,.saveBtn svg{width:15px;height:15px;}
-  .menu-btn:hover,.menu.open>.menu-btn,.toolbar-btn:hover,.saveBtn.clean:hover{
-    background:#f1f5f9;border-radius:0;
+  @media(min-width:701px){
+    #tbFolder.folder-required{animation:folderAttention 2s ease-in-out infinite;}
   }
-  .toolbar-btn.t-active,.toolbar-btn.t-active:hover{
-    background:#e8f1ff;color:#0969ef;box-shadow:inset 0 0 0 1px #cfdef3;
+  @media(min-width:701px) and (prefers-reduced-motion:reduce){
+    #tbFolder.folder-required{animation:none;background:#fff1f2;color:#b42318;box-shadow:inset 0 0 0 1px #fda4af;}
   }
-  .menubar-sep{background:#cfd8e3;margin:5px 1px;}
-  .menubar>.menubar-sep:first-child{display:none;}
-  .saveBtn.dirty{color:#fff;}
+  .menu-dropdown{background:#fff;border:1px solid #dce2e9;border-radius:9px;padding:5px;min-width:245px;box-shadow:0 8px 24px #23344d1f;}
+  .mi{border-radius:5px;padding:8px 10px;color:#334155;}
+  .mi:hover:not(.disabled){background:#edf3fc;color:#0969da;}
+  .mi:hover:not(.disabled) .kbd{color:#64748b;}
+  .mi-sep{background:#e8ecf1;margin:5px;}
+  .notesPanel[hidden]{display:none!important;}
+  .notesPanel{background:#f8fafc;width:250px;}
+  .notesPanel-label{display:flex;align-items:center;justify-content:space-between;border:0;margin:0;padding:12px 14px 4px;}
+  #closeNotes{border:0;background:transparent;color:#64748b;font-size:22px;cursor:pointer;border-radius:4px;width:28px;height:28px;}
+  #closeNotes:hover{background:#e8edf3;}
+  .notes-sort{display:flex;gap:4px;padding:4px 12px 10px;border-bottom:1px solid #e2e8f0;}
+  .notes-sort .toolbar-btn{flex:1;font-size:11px;justify-content:center;}
   @media(max-width:700px){
-    .app-header{min-height:67px;padding:9px 14px;}
-    .app-header-name{font-size:25px;letter-spacing:5px;}
-    .app-header-tagline{display:block;font-size:7px;letter-spacing:2.5px;}
-    .menubar{padding:0 4px;}
-    .menu-btn,.toolbar-btn,.saveBtn{padding:8px;min-width:34px;}
-    .menubar-sep{margin:5px 0;}
+    .app-header{padding:9px 14px;}.app-header-name{font-size:25px;letter-spacing:5px;}
+    .app-header-tagline{font-size:7px;letter-spacing:2.5px;}
+    .menubar{padding:6px;gap:2px;}
+    .menu-btn .menu-label,#tbNotes .menu-label,.notes-sort .menu-label{display:inline;}
+    .menu-btn,.toolbar-btn,.saveBtn{padding:8px;min-height:36px;}
+    #tbNewNote{margin-left:0;}
+    .notesPanel{width:85vw;}
   }
+
+  button:disabled{opacity:.4;cursor:default;}
+  .mi:disabled:hover{background:transparent;color:#64748b;}
+  .statusbar[hidden]{display:none;}
+  .focus-mode .app-header,.focus-mode .appFooter{display:none;}
+  textarea.editor{display:block;}
+  .editor-folio:has(.preview-pane.active) textarea.editor{display:none;}
+  .menu-dropdown{max-height:75vh;overflow-y:auto;}
+  [data-menu="view"]>.menu-dropdown{overflow:visible;}
+  #tbRename .menu-label{display:inline;}
+  .mi svg{width:16px;height:16px;}
 </style>
 </head>
 <body>
@@ -542,14 +586,7 @@
   <div class="app-shell">
 
   <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
-  <header class="app-header">
-    <div class="app-header-logo">
-      <div class="app-header-wordmark">
-        <h1 class="app-header-name" aria-label="Editorium">E<span class="app-header-name-accent">DIT</span>ORIUM</h1>
-        <span class="app-header-tagline">Editor de notas local</span>
-      </div>
-    </div>
-  </header>
+  <header class="app-header"><div class="app-header-wordmark"><h1 class="app-header-name" aria-label="Editorium">E<span>DIT</span>ORIUM</h1><span class="app-header-tagline">Editor de notas local</span></div></header>
   <!-- ════════════════════════════════════════════════════════════════ -->
 
   <div class="toast" id="toast">
@@ -566,6 +603,7 @@
     <button type="button" id="connectBarBtn">Elegir carpeta…</button>
   </div>
   <nav class="menubar" aria-label="Herramientas del editor">
+    <button type="button" class="toolbar-btn" id="tbNotes" aria-expanded="false" aria-controls="notesPanel" title="Mostrar u ocultar notas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M12 9h6M12 13h6"/></svg><span class="menu-label">Notas</span></button>
     <div class="menubar-sep"></div>
     <div class="menu" data-menu="file">
       <button class="menu-btn" aria-label="Archivo"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg><span class="menu-label">Archivo</span></button>
@@ -621,7 +659,7 @@
     <!-- Botones directos: Nueva nota · Buscar -->
     <button type="button" class="toolbar-btn" id="tbNewNote" title="Nueva nota (Ctrl+N)" aria-label="Nueva nota">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-      <span class="menu-label">Crear nuevo</span>
+      <span class="menu-label">Nueva</span>
     </button>
     <button type="button" class="toolbar-btn" id="tbSearch" title="Buscar en todas las notas" aria-label="Buscar nota">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -641,7 +679,7 @@
     </button>
     <button type="button" class="toolbar-btn" id="tbSortAlpha" title="Ordenar A-Z" aria-label="Ordenar A-Z">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="11" y2="6"/><line x1="4" y1="12" x2="11" y2="12"/><line x1="4" y1="18" x2="13" y2="18"/><polyline points="15 9 18 6 21 9"/><line x1="18" y1="6" x2="18" y2="18"/></svg>
-      <span class="menu-label">Ordenar A–Z</span>
+      <span class="menu-label">A-Z</span>
     </button>
 
     <div class="menubar-sep"></div>
@@ -649,7 +687,7 @@
     <!-- Carpeta -->
     <button type="button" class="toolbar-btn" id="tbFolder" title="Elegir carpeta de guardado" aria-label="Elegir carpeta">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5H4.5A1.5 1.5 0 0 1 3 16.5z"/></svg>
-      <span class="menu-label">Elegir carpeta</span>
+      <span class="menu-label">Carpeta</span>
     </button>
 
     <div class="menubar-sep push"></div>
@@ -664,8 +702,8 @@
   </nav>
 
   <main class="workspace">
-    <aside class="notesPanel" id="notesPanel">
-      <div class="notesPanel-label">Mis notas</div>
+    <aside class="notesPanel" id="notesPanel" hidden>
+      <div class="notesPanel-label">Mis notas<button type="button" id="closeNotes" aria-label="Cerrar notas">×</button></div><div class="notes-sort" aria-label="Ordenar notas"></div>
       <div class="notesPanel-scroll" id="notesPanelList"></div>
     </aside>
     <div class="editorstack" id="editorstack">
@@ -707,7 +745,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V9.4.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.7.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -878,6 +916,11 @@
   }
 
   function syncFolderStatus(){
+    const folderButton = document.getElementById('tbFolder');
+    folderButton.classList.toggle('folder-required', supportsFSAccess && !saveDirHandle);
+    folderButton.title = saveDirHandle
+      ? 'Carpeta conectada: ' + saveDirHandle.name + '. Haz clic para cambiarla.'
+      : 'Seleccionar carpeta de notas para comenzar';
     const el = document.getElementById('folderStatus');
     if(!supportsFSAccess){
       el.textContent = 'Carpeta fija no disponible (usa Chrome/Edge)';
@@ -962,7 +1005,29 @@
   connectBarBtn.addEventListener('click', chooseSaveFolder);
 
   // ============ Panel de todas mis notas ============
-  const notesPanelOpen = true;
+  let notesPanelOpen = false;
+  const tbNotes = document.getElementById('tbNotes');
+  function setNotesPanel(open){
+    notesPanelOpen = open;
+    notesPanel.hidden = !open;
+    tbNotes.setAttribute('aria-expanded', String(open));
+    tbNotes.classList.toggle('t-active', open);
+    if(open) refreshNotesPanel();
+    syncMobileOverlay();
+  }
+  tbNotes.addEventListener('click', () => setNotesPanel(!notesPanelOpen));
+  document.getElementById('closeNotes').addEventListener('click', () => {setNotesPanel(false);tbNotes.focus();});
+  const nav = document.querySelector('.menubar');
+  nav.querySelectorAll(':scope > .menubar-sep').forEach(el => el.remove());
+  const sortBar = document.querySelector('.notes-sort');
+  ['tbSortDate','tbSortAlpha'].forEach(id => sortBar.append(document.getElementById(id)));
+  const order = ['[data-menu="file"]','[data-menu="edit"]','[data-menu="font"]','#tbNewNote','#tbRename','#tbSearch','#tbFolder','#tbNotes','#quickSaveBtn'];
+  order.forEach(selector => nav.append(nav.querySelector(selector)));
+  document.querySelector('#tbNewNote .menu-label').textContent = 'Nueva nota';
+  document.querySelector('#tbFolder .menu-label').textContent = 'Seleccionar carpeta';
+  document.getElementById('tbFolder').setAttribute('aria-label', 'Seleccionar carpeta');
+  document.querySelector('#tbSortDate .menu-label').textContent = 'Recientes';
+  document.querySelector('#tbSortAlpha .menu-label').textContent = 'A–Z';
   let notesSortMode = 'date';
 
   // Botones del Ribbon
@@ -1444,6 +1509,7 @@
   function refreshAll(){
     updateCounts(); updateCursorStatus();
     syncQuickSave();
+    updateMenuStates();
     editorEmpty.classList.toggle('show', tabs.length === 0);
     // Actualiza indicadores del panel EN SITIO — reconstruirlo entero en
     // cada tecla producía saltos y parpadeo al escribir (bug v9.2)
@@ -1810,7 +1876,7 @@
   function doUndo(){
     if(isLocked()) return;
     if(!activeTextarea()) return;
-    document.execCommand('undo'); refreshAll();
+    activeTextarea().focus();document.execCommand('undo'); refreshAll();
   }
   function insertDateTime(){
     if(isLocked()){ showToast('Conecta una carpeta de guardado para poder escribir.'); return; }
@@ -2043,6 +2109,75 @@
   }
 
   // ============ Menú: apertura / cierre ============
+
+  // Menús organizados por intención: archivo, edición, formato y vista.
+  function menuItem(label, handler){
+    const b=document.createElement('button');b.type='button';b.className='mi';b.textContent=label;
+    b.addEventListener('click',()=>{handler();closeAllMenus();});return b;
+  }
+  function addMenu(name,label){
+    const m=document.createElement('div');m.className='menu';m.dataset.menu=name;
+    m.innerHTML='<button type="button" class="menu-btn" aria-label="'+label+'"><span class="menu-label">'+label+'</span></button><div class="menu-dropdown"></div>';
+    nav.insertBefore(m,document.getElementById('tbNewNote'));return m.lastElementChild;
+  }
+  function renameAction(action,label){
+    const b=document.querySelector('[data-action="'+action+'"]');
+    Array.from(b.childNodes).filter(n=>n.nodeType===3).forEach(n=>n.remove());
+    const span=document.createElement('span');span.textContent=label;b.insertBefore(span,b.querySelector('.kbd'));return b;
+  }
+  renameAction('newTab','Nueva nota');renameAction('open','Abrir archivo…');
+  renameAction('delete','Eliminar selección');renameAction('find','Buscar en esta nota…');
+  renameAction('chooseFolder','Seleccionar carpeta de notas…');renameAction('goto','Ir a la línea…');
+  document.querySelector('[data-action="exitApp"]').remove();
+  const fileDD=document.querySelector('[data-menu="file"]>.menu-dropdown');
+  if(fileDD.lastElementChild.classList.contains('mi-sep'))fileDD.lastElementChild.remove();
+  const renameButton=document.getElementById('tbRename');renameButton.className='mi';
+  fileDD.insertBefore(renameButton,document.querySelector('[data-action="save"]'));
+  function exportNote(ext){
+    const t=activeTab();if(!t)return;
+    const url=URL.createObjectURL(new Blob([t.ta.value],{type:ext==='md'?'text/markdown;charset=utf-8':'text/plain;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download=t.name.replace(/\.[^.]+$/,'')+'.'+ext;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  fileDD.insertBefore(menuItem('Exportar Markdown (.md)…',()=>exportNote('md')),document.querySelector('[data-action="print"]'));
+  fileDD.insertBefore(menuItem('Exportar texto (.txt)…',()=>exportNote('txt')),document.querySelector('[data-action="print"]'));
+  const undo=document.querySelector('[data-action="undo"]');
+  undo.after(menuItem('Rehacer',()=>{const ta=activeTextarea();if(!ta||isLocked())return;ta.focus();document.execCommand('redo');refreshAll();}));
+  const formatDD=addMenu('format','Formato');
+  [['Negrita','bold'],['Cursiva','italic'],['Tachado','strike'],['Título principal','h1'],['Encabezado 2','h2'],['Encabezado 3','h3'],['Lista con viñetas','ul'],['Lista numerada','ol'],['Lista de tareas','task'],['Enlace','link'],['Cita','quote'],['Código en línea','code'],['Bloque de código','codeblock'],['Separador','hr']].forEach(([label,cmd])=>formatDD.append(menuItem(label,()=>{const t=activeTab();if(t&&!t.previewMode){t.ta.focus();applyMdFormat(t.ta,cmd);}})));
+  const viewDD=addMenu('view','Ver');
+  viewDD.append(menuItem('Vista previa Markdown',()=>togglePreview(activeTab())));
+  viewDD.append(menuItem('Modo concentración',()=>{document.body.classList.toggle('focus-mode');setNotesPanel(false);}));
+  const fontWrap=document.getElementById('fontMenuWrap');
+  fontWrap.className='submenuwrap';fontWrap.querySelector('.menu-btn').className='mi has-sub';
+  fontWrap.querySelector('.menu-label').textContent='Tipografía y tamaño ›';
+  fontMenuDropdown.className='menu-dropdown submenu';viewDD.append(fontWrap);
+  fontWrap.firstElementChild.addEventListener('click',buildFontMenu);
+  viewDD.append(menuItem('Mostrar / ocultar barra de estado',()=>{statusbar.hidden=!statusbar.hidden;}));
+  const helpDD=addMenu('help','Ayuda');
+  helpDD.append(menuItem('Atajos de teclado',()=>alertModal('Nueva nota: Ctrl/⌘ + N · Guardar: Ctrl/⌘ + S · Buscar: Ctrl/⌘ + F · Vista previa: Ctrl/⌘ + Shift + P · Negrita: Ctrl/⌘ + B · Cursiva: Ctrl/⌘ + I · Deshacer: Ctrl/⌘ + Z · Rehacer: Ctrl/⌘ + Shift + Z.',{title:'Atajos de teclado'})));
+  helpDD.append(menuItem('Guía Markdown',()=>alertModal('Usa # para títulos, **texto** para negrita, *texto* para cursiva, - para listas, - [ ] para tareas y [texto](https://ejemplo.com) para enlaces. Activa Ver → Vista previa Markdown para leer el resultado.',{title:'Guía Markdown'})));
+  helpDD.append(menuItem('Acerca de Editorium',()=>alertModal('Editorium 9.7 · Editor de notas local con Markdown.',{title:'Acerca de Editorium'})));
+  document.querySelector('#tbSearch .menu-label').textContent='Buscar notas';
+  const mac=/Mac|iPhone|iPad/.test(navigator.platform);
+  document.querySelectorAll('.kbd').forEach(el=>{if(mac)el.textContent=el.textContent.replace(/Ctrl/g,'⌘');});
+  function updateMenuStates(){
+    const t=activeTab();
+    document.querySelectorAll('[data-action="save"],[data-action="saveAs"],[data-action="print"],#tbRename').forEach(b=>b.disabled=!t);
+    quickSaveBtn.disabled=!t;
+    formatDD.querySelectorAll('button').forEach(b=>b.disabled=!t||isLocked()||t.previewMode);
+    viewDD.firstElementChild.disabled=!t;
+  }
+  nav.addEventListener('click',updateMenuStates);updateMenuStates();
+  nav.addEventListener('keydown',e=>{
+    if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;
+    const m=e.target.closest('.menu');if(!m)return;
+    e.preventDefault();m.classList.add('open');syncMobileOverlay();
+    const choices=Array.from(m.querySelectorAll('.menu-dropdown button:not(:disabled)')).filter(b=>b.getClientRects().length&&!b.classList.contains('disabled'));
+    const i=choices.indexOf(document.activeElement);
+    const next=e.key==='Home'?0:e.key==='End'?choices.length-1:e.key==='ArrowUp'?(i-1+choices.length)%choices.length:(i+1)%choices.length;
+    choices[next]?.focus();
+  });
+
   const menuEls = Array.from(document.querySelectorAll('.menubar > .menu'));
   const mobileBackdrop = document.getElementById('mobileBackdrop');
   function syncMobileOverlay(){
@@ -2050,6 +2185,7 @@
     document.body.classList.toggle('mobile-overlay-open', anyMenuOpen || notesPanelOpen);
   }
   mobileBackdrop.addEventListener('click', function(){
+    setNotesPanel(false);
     closeAllMenus();
   });
   function refreshMenuContent(menuEl){
@@ -2282,12 +2418,13 @@
   window.addEventListener('keydown', function(e){
     const ctrl = e.ctrlKey || e.metaKey;
     const key = e.key.toLowerCase();
-    if(ctrl && key === 'n' && !e.shiftKey){ e.preventDefault(); newTab(); }
+    if(ctrl && e.shiftKey && key === 'z'){const ta=activeTextarea();if(ta&&!isLocked()){e.preventDefault();ta.focus();document.execCommand('redo');refreshAll();}}
+    else if(ctrl && key === 'n' && !e.shiftKey){ e.preventDefault(); newTab(); }
     else if(ctrl && key === 'o'){ e.preventDefault(); openFile(); }
     else if(ctrl && key === 's' && !e.shiftKey && !e.altKey){ e.preventDefault(); saveTab(activeTab()); }
     else if(ctrl && e.shiftKey && key === 's'){ e.preventDefault(); saveTabAs(activeTab()); }
     else if(ctrl && e.altKey && key === 's'){ e.preventDefault(); saveAllTabs(); }
-    else if(ctrl && key === 'p'){ e.preventDefault(); printActive(); }
+    else if(ctrl && key === 'p' && !e.shiftKey){ e.preventDefault(); printActive(); }
     else if(ctrl && key === 'f'){ e.preventDefault(); toggleFindBar(true); }
     else if(key === 'f3' && !e.shiftKey){ e.preventDefault(); searchDir(true); }
     else if(e.shiftKey && key === 'f3'){ e.preventDefault(); searchDir(false); }
@@ -2297,7 +2434,7 @@
     else if(ctrl && e.shiftKey && key === 'p'){ e.preventDefault(); togglePreview(activeTab()); }
     else if(ctrl && key === 'b' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'bold'); } }
     else if(ctrl && key === 'i' && !e.shiftKey){ const t=activeTab(); if(t&&!t.previewMode){ e.preventDefault(); applyMdFormat(t.ta,'italic'); } }
-    else if(key === 'escape'){ closeAllMenus(); toggleFindBar(false); closeModal(); }
+    else if(key === 'escape'){ if(notesPanelOpen){setNotesPanel(false);tbNotes.focus();} closeAllMenus(); toggleFindBar(false); closeModal(); }
   });
 
   findInput.addEventListener('keydown', function(e){
