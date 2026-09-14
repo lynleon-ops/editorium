@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 9.17</title>
+<title>Editorium 9.18</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -634,6 +634,8 @@
   .notesPanel-trashBtn{opacity:.55;}
   .notesPanel-card:focus-within{outline:2px solid #bacde5;outline-offset:2px;}
   @media(max-width:700px){.notesPanel{width:85vw;max-width:300px;}}
+  .note-date{display:block;flex-shrink:0;padding-top:8px;color:#8794a5;
+    font-size:11px;line-height:1.5;font-weight:400;letter-spacing:0;text-align:right;}
 </style>
 </head>
 <body>
@@ -759,7 +761,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V9.17.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.18.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -1125,7 +1127,7 @@
       try{
         const file = await item.handle.getFile();
         const text = await file.text();
-        createTab({ name: item.name, content: text, handle: item.handle });
+        createTab({ lastModified: file.lastModified, name: item.name, content: text, handle: item.handle });
       }catch(e){ await alertModal('No se pudo abrir el archivo.'); }
     });
     card.querySelector('.notesPanel-pinBtn').addEventListener('click', function(e){
@@ -1310,7 +1312,7 @@
         try{
           const file = await m.handle.getFile();
           const text = await file.text();
-          createTab({ name: m.name, content: text, handle: m.handle });
+          createTab({ lastModified: file.lastModified, name: m.name, content: text, handle: m.handle });
           closeModal();
         }catch(e){ await alertModal('No se pudo abrir el archivo.'); }
       });
@@ -1369,15 +1371,22 @@
     preview.className = 'preview-pane';
     folio.appendChild(preview);
 
+    const dateLabel = document.createElement('time');
+    dateLabel.className = 'note-date';
+    dateLabel.lang = 'en';
+    folio.appendChild(dateLabel);
     wrapper.appendChild(folio);
     editorstack.appendChild(wrapper);
 
     const tab = {
       id, name: opts.name || 'sin-título.txt', handle: opts.handle || null,
       ta, preview, wrapper, folio, folioTitle, originalContent: opts.content || '',
+      dateLabel, dateStamp: opts.lastModified || Date.now(),
+      dateKind: opts.lastModified ? 'Edited' : 'Created', lastObservedContent: ta.value,
       previewMode: false
     };
     tabs.push(tab);
+    updateNoteDate(tab);
 
     attachEditorEvents(ta);
     wrapper.classList.remove('active');
@@ -1494,7 +1503,19 @@
     statusLeft.textContent = txt;
   }
 
+  function updateNoteDate(tab){
+    if(tab.ta.value !== tab.lastObservedContent){
+      tab.dateStamp = Date.now();
+      tab.dateKind = 'Edited';
+      tab.lastObservedContent = tab.ta.value;
+    }
+    tab.dateLabel.dateTime = new Date(tab.dateStamp).toISOString();
+    tab.dateLabel.textContent = tab.dateKind + ' · ' + new Intl.DateTimeFormat('en-US', {
+      month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'
+    }).format(tab.dateStamp);
+  }
   function refreshAll(){
+    tabs.forEach(updateNoteDate);
     updateCounts(); updateCursorStatus();
     syncQuickSave();
     updateMenuStates();
@@ -1534,7 +1555,7 @@
         });
         const file = await handle.getFile();
         const text = await file.text();
-        createTab({ name: file.name, content: text, handle });
+        createTab({ lastModified: file.lastModified, name: file.name, content: text, handle });
         addRecent(file.name, handle);
       }catch(err){ /* cancelado */ }
     } else {
@@ -1544,7 +1565,7 @@
   fileInput.addEventListener('change', async function(){
     const file = fileInput.files[0]; if(!file) return;
     const text = await file.text();
-    createTab({ name: file.name, content: text });
+    createTab({ lastModified: file.lastModified, name: file.name, content: text });
     fileInput.value = '';
   });
 
@@ -2088,7 +2109,7 @@
         try{
           const file = await r.handle.getFile();
           const text = await file.text();
-          createTab({ name: file.name, content: text, handle: r.handle });
+          createTab({ lastModified: file.lastModified, name: file.name, content: text, handle: r.handle });
         }catch(err){ await alertModal('No se pudo reabrir el archivo (puede que ya no exista o se movió).'); }
         closeAllMenus();
       });
