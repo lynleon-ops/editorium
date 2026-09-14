@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 9.13</title>
+<title>Editorium 9.14</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -759,7 +759,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V9.13.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.14.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -880,32 +880,6 @@
     }catch(e){ /* sin datos guardados, o IndexedDB no disponible */ }
   }
 
-  // Recuerda qué notas (de la carpeta fija) estaban abiertas, para poder
-  // reabrirlas automáticamente la próxima vez que se conecte esa carpeta.
-  async function persistOpenTabs(){
-    try{
-      const names = tabs.filter(t => t.handle).map(t => t.name);
-      await idbSet('openTabNames', names);
-    }catch(e){ /* IndexedDB no disponible */ }
-  }
-  async function reopenPreviousTabs(){
-    if(!saveDirHandle) return;
-    try{
-      const names = await idbGet('openTabNames');
-      if(!Array.isArray(names) || names.length === 0) return;
-      for(const name of names){
-        if(tabs.some(t => t.name === name)) continue; // ya está abierta
-        try{
-          const handle = await saveDirHandle.getFileHandle(name);
-          const file = await handle.getFile();
-          const text = await file.text();
-          createTab({ name, content: text, handle, makeActive: false });
-        }catch(e){ /* la nota pudo borrarse o renombrarse mientras tanto */ }
-      }
-      if(tabs.length > 0 && !activeTabId) activateTab(tabs[0].id);
-    }catch(e){ /* sin datos guardadas */ }
-  }
-
   async function syncLocationWarning(){
     const el = document.getElementById('locationWarning');
     const t = activeTab();
@@ -977,7 +951,7 @@
       syncFolderStatus();
       syncLocationWarning();
       if(notesPanelOpen) refreshNotesPanel();
-      reopenPreviousTabs();
+
     }catch(e){ /* el usuario canceló el selector */ }
   }
 
@@ -997,7 +971,7 @@
     }catch(e){ /* sin IndexedDB, o el handle ya no es válido: seguimos sin carpeta fija */ }
     syncFolderStatus();
     syncLocationWarning();
-    reopenPreviousTabs();
+
     if(saveDirHandle) refreshNotesPanel();
   }
   reconnectBtn.addEventListener('click', async function(){
@@ -1011,7 +985,7 @@
         syncFolderStatus();
         syncLocationWarning();
         if(notesPanelOpen) refreshNotesPanel();
-        reopenPreviousTabs();
+
       }
     }catch(e){ /* el usuario negó el permiso */ }
   });
@@ -1409,7 +1383,7 @@
     wrapper.classList.remove('active');
     if(opts.makeActive !== false) activateTab(id);
     else buildTabsBar();
-    if(tab.handle) persistOpenTabs();
+
     return tab;
   }
 
@@ -1440,7 +1414,7 @@
     const idx = tabs.indexOf(tab);
     tab.wrapper.remove();
     tabs.splice(idx, 1);
-    if(tab.handle) persistOpenTabs();
+
     if(tabs.length === 0){
       activeTabId = null;
       refreshAll();
@@ -1736,7 +1710,7 @@
             pinnedNames = pinnedNames.map(n => n === oldName ? newName : n);
             savePinnedNames();
           }
-          persistOpenTabs();
+
           refreshAll();
           if(notesPanelOpen) refreshNotesPanel();
           showToast('Nota renombrada ✓');
@@ -1775,7 +1749,7 @@
       if(tab.folioTitle) tab.folioTitle.textContent = noteDisplayName(name);
       tab.originalContent = tab.ta.value;
       addRecent(tab.name, handle);
-      persistOpenTabs();
+
       refreshAll();
       showToast('Guardado ✓');
       syncLocationWarning();
