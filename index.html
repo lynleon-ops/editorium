@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Editorium 9.7</title>
+<title>Editorium 9.11</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23166534'/%3E%3Cpath d='M7 8h12v3H7zM7 14h18v3H7zM7 20h14v3H7z' fill='%234ade80'/%3E%3Ccircle cx='24' cy='8.5' r='3.5' fill='%234ade80'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -537,16 +537,6 @@
   #tbNewNote{margin-left:8px;}
   #quickSaveBtn{margin-left:auto;}
   #tbFolder .menu-label{display:inline;}
-  @keyframes folderAttention{
-    0%,100%{background:#fff1f2;color:#b42318;box-shadow:inset 0 0 0 1px #fda4af;}
-    50%{background:#b42318;color:#fff;box-shadow:inset 0 0 0 1px #b42318;}
-  }
-  @media(min-width:701px){
-    #tbFolder.folder-required{animation:folderAttention 2s ease-in-out infinite;}
-  }
-  @media(min-width:701px) and (prefers-reduced-motion:reduce){
-    #tbFolder.folder-required{animation:none;background:#fff1f2;color:#b42318;box-shadow:inset 0 0 0 1px #fda4af;}
-  }
   .menu-dropdown{background:#fff;border:1px solid #dce2e9;border-radius:9px;padding:5px;min-width:245px;box-shadow:0 8px 24px #23344d1f;}
   .mi{border-radius:5px;padding:8px 10px;color:#334155;}
   .mi:hover:not(.disabled){background:#edf3fc;color:#0969da;}
@@ -579,6 +569,71 @@
   [data-menu="view"]>.menu-dropdown{overflow:visible;}
   #tbRename .menu-label{display:inline;}
   .mi svg{width:16px;height:16px;}
+
+  /* Etiquetas del menú y acciones en mayúsculas. */
+  .menubar .menu-btn,.menubar .toolbar-btn,.menubar .saveBtn,.menubar .mi,.menubar .mi-label{ text-transform:uppercase; }
+  .connectBar,.reconnectBar{display:none!important;}
+
+  /* Superficie de escritura: folio centrado y texto sin recuadro interior. */
+  .editorstack{background:#f3f5f8;}
+  .tab-wrapper.active{padding:28px 24px;background:#f3f5f8;}
+  .editor-folio{
+    width:100%;max-width:900px;margin:0 auto;padding:36px 48px 40px;
+    border:1px solid #e2e7ee;border-radius:14px;
+    box-shadow:0 3px 8px #25385804,0 14px 40px #25385808;
+    gap:24px;flex:1 0 auto;
+  }
+  .editor-folio:focus-within{border-color:#bacde5;}
+  .editor-folio-title{
+    padding:0 0 18px;border-bottom:1px solid #edf0f4;
+    color:#334155;font-size:20px;line-height:1.4;font-weight:600;
+    letter-spacing:-.3px;text-transform:none;overflow-wrap:anywhere;
+  }
+  textarea.editor,.preview-pane{
+    border:0;border-radius:0;padding:4px 0 16px;background:transparent;
+    color:#334155;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:var(--editor-font-size);line-height:1.85;
+    min-height:calc(100dvh - 350px);flex:1;
+    scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;
+  }
+  textarea.editor:focus-visible{outline:2px solid #dbe7f5;outline-offset:10px;border-radius:4px;}
+  textarea.editor::placeholder{color:#8794a5;}
+  textarea.editor::selection{background:#dbeafe;color:#1e3a5f;}
+  .editorEmpty{gap:16px;}
+  .editorEmpty-icon{opacity:.65;}
+  .editorEmpty p{color:#64748b;line-height:1.6;}
+  .editorEmpty button{border-radius:8px;padding:11px 20px;}
+  @media(max-width:700px){
+    .tab-wrapper.active{padding:14px 10px;}
+    .editor-folio{padding:24px 20px;border-radius:10px;gap:18px;}
+    .editor-folio-title{font-size:18px;padding-bottom:14px;}
+    textarea.editor,.preview-pane{font-size:16px;line-height:1.8;min-height:calc(100dvh - 310px);}
+    textarea.editor:focus-visible{outline-offset:6px;}
+  }
+
+  /* Biblioteca de notas con la misma superficie y tipografía que el folio. */
+  .notesPanel{background:#f3f5f8;border-right:1px solid #e2e7ee;width:270px;}
+  .notesPanel-label{padding:20px 18px 8px;font-size:15px;font-weight:600;
+    line-height:1.4;letter-spacing:0;text-transform:none;color:#334155;}
+  .notes-sort{margin:0 16px 12px;padding:4px;gap:4px;border:1px solid #e2e7ee;
+    border-radius:9px;background:#fff;}
+  .notes-sort .toolbar-btn{border-radius:6px;color:#64748b;font-weight:500;}
+  .notes-sort .toolbar-btn.t-active{background:#eaf2ff;color:#0969da;}
+  .notesPanel-scroll{padding:0 16px 20px;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent;}
+  .notesPanel-card{background:#fff;border:1px solid #e2e7ee;border-radius:12px;
+    padding:14px 12px;margin-bottom:10px;box-shadow:0 3px 8px #25385804;}
+  .notesPanel-card:hover{border-color:#bacde5;box-shadow:0 4px 12px #25385808;}
+  .notesPanel-card.active{border:1px solid #bacde5;background:#edf4ff;
+    box-shadow:inset 3px 0 0 #0969da;}
+  .notesPanel-cardTitle{font-size:14px;line-height:1.5;font-weight:500;color:#334155;}
+  .notesPanel-cardSub{font-size:11px;line-height:1.5;margin-top:6px;color:#64748b;}
+  .notesPanel-section{font-size:10px;font-weight:600;letter-spacing:.6px;color:#64748b;padding:8px 2px;}
+  .notesPanel-section::after{background:#e2e7ee;}
+  .notesPanel-empty{color:#64748b;font-size:13px;line-height:1.7;padding:12px 2px;}
+  .notesPanel-empty button{border-radius:8px;padding:10px;}
+  .notesPanel-trashBtn{opacity:.55;}
+  .notesPanel-card:focus-within{outline:2px solid #bacde5;outline-offset:2px;}
+  @media(max-width:700px){.notesPanel{width:85vw;max-width:300px;}}
 </style>
 </head>
 <body>
@@ -605,54 +660,13 @@
   <nav class="menubar" aria-label="Herramientas del editor">
     <button type="button" class="toolbar-btn" id="tbNotes" aria-expanded="false" aria-controls="notesPanel" title="Mostrar u ocultar notas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M12 9h6M12 13h6"/></svg><span class="menu-label">Notas</span></button>
     <div class="menubar-sep"></div>
-    <div class="menu" data-menu="file">
-      <button class="menu-btn" aria-label="Archivo"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg><span class="menu-label">Archivo</span></button>
-      <div class="menu-dropdown">
-        <button class="mi" data-action="newTab"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 2h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.4"/><path d="M14 2v4h4" fill="none" stroke="#2872c4" stroke-width="1.4" stroke-linejoin="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="15" x2="16" y2="15" stroke="#9aa3ad" stroke-width="1.3"/><line x1="8" y1="18" x2="13" y2="18" stroke="#9aa3ad" stroke-width="1.3"/><circle cx="18.5" cy="18.5" r="3.6" fill="#2f9e44"/><path d="M18.5 16.8v3.4M16.8 18.5h3.4" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round"/></svg>Nueva pestaña<span class="kbd">Ctrl+N</span></button>
-        <button class="mi" data-action="open"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/></svg>Abrir<span class="kbd">Ctrl+O</span></button>
-        <div class="submenuwrap" id="recentWrap">
-          <button class="mi has-sub" data-sub="true"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#eef3fb" stroke="#2872c4" stroke-width="1.4"/><path d="M12 7v5l3.5 2" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Reciente<span class="kbd">›</span></button>
-          <div class="menu-dropdown submenu" id="recentSubmenu"></div>
-        </div>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="save"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><rect x="9.6" y="15" width="4.8" height="2" fill="#9aa3ad"/></svg>Guardar<span class="kbd">Ctrl+S</span></button>
-        <button class="mi" data-action="saveAs"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#2872c4"/><rect x="7" y="13" width="10" height="8" fill="#ffffff"/><rect x="9" y="3" width="6" height="5" fill="#ffffff"/><circle cx="18" cy="18" r="4.6" fill="#f0883e" stroke="#ffffff" stroke-width="1"/><path d="M16.3 19.7l1-3.1 3.1 1-3.1 3.1z" fill="#ffffff"/></svg>Guardar como<span class="kbd">Ctrl+Shift+S</span></button>
-        <button class="mi" data-action="saveAll"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M6 6h9l4 4v9a1.4 1.4 0 0 1-1.4 1.4H6A1.4 1.4 0 0 1 4.6 19V7.4A1.4 1.4 0 0 1 6 6z" fill="#9bbbe4"/><path d="M3 3h9l4 4v9a1.4 1.4 0 0 1-1.4 1.4H3A1.4 1.4 0 0 1 1.6 16V4.4A1.4 1.4 0 0 1 3 3z" fill="#2872c4"/><rect x="5" y="12" width="9" height="6.4" fill="#ffffff"/><rect x="6.5" y="3" width="5" height="4" fill="#ffffff"/></svg>Guardar todo<span class="kbd">Ctrl+Alt+S</span></button>
-        <button class="mi" data-action="chooseFolder"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4.4l1.6 1.8h8a1.5 1.5 0 0 1 1.5 1.5v1.2H3z" fill="#f6c453"/><path d="M2.6 9.8a1.3 1.3 0 0 1 1.28-1.5h16.24a1.3 1.3 0 0 1 1.28 1.5l-1.05 7.4a1.6 1.6 0 0 1-1.58 1.4H5.23a1.6 1.6 0 0 1-1.58-1.4z" fill="#f0b429" stroke="#d99a0c" stroke-width=".6"/><circle cx="17.5" cy="14.3" r="3.4" fill="#2872c4" stroke="#ffffff" stroke-width=".8"/><path d="M17.5 12.6v3.4M15.8 14.3h3.4" stroke="#ffffff" stroke-width="1" stroke-linecap="round"/></svg>Carpeta de guardado…</button>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="print"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="6" fill="#ffffff" stroke="#9aa3ad" stroke-width="1"/><rect x="3" y="8" width="18" height="9" rx="1.4" fill="#6b7280"/><rect x="6" y="13" width="12" height="8" fill="#ffffff" stroke="#9aa3ad" stroke-width="1"/><circle cx="17" cy="11" r="1" fill="#2872c4"/></svg>Imprimir<span class="kbd">Ctrl+P</span></button>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="exitApp"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="#9aa3ad" stroke-width="1.8" stroke-linecap="round"/><path d="M16 17l5-5-5-5" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke="#f0883e" stroke-width="2" stroke-linecap="round"/></svg>Salir</button>
-      </div>
-    </div>
+    
 
     <div class="menubar-sep"></div>
-    <div class="menu" data-menu="edit">
-      <button class="menu-btn" aria-label="Edición"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 20l1-4.2L15.5 5.3a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19l-4.2 1z" fill="#2872c4"/><path d="M4 20l1-4.2 3.2 3.2z" fill="#9aa3ad"/><path d="M14.3 6.5l3.2 3.2" stroke="#ffffff" stroke-width="1.1"/></svg><span class="menu-label">Edición</span></button>
-      <div class="menu-dropdown">
-        <button class="mi" data-action="undo"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round"/><path d="M9 14l-5-5 5-5" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Deshacer<span class="kbd">Ctrl+Z</span></button>
-        <button class="mi" data-action="cut"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" fill="#f0883e"/><circle cx="6" cy="18" r="3" fill="#2872c4"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12" stroke="#9aa3ad" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Cortar<span class="kbd">Ctrl+X</span></button>
-        <button class="mi" data-action="copy"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M5 2h6l3 3v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="#cdddf3" stroke="#2872c4" stroke-width="1"/><path d="M9 9h9l3 3v8a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z" fill="#ffffff" stroke="#2872c4" stroke-width="1.2"/></svg>Copiar<span class="kbd">Ctrl+C</span></button>
-        <button class="mi" data-action="paste"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="19" rx="1.5" fill="#e9c46a"/><rect x="7" y="6" width="10" height="14" fill="#ffffff"/><rect x="8.5" y="1.5" width="7" height="3.6" rx="1" fill="#9aa3ad"/><line x1="9" y1="10" x2="15" y2="10" stroke="#9aa3ad" stroke-width="1.1"/><line x1="9" y1="13" x2="15" y2="13" stroke="#9aa3ad" stroke-width="1.1"/><line x1="9" y1="16" x2="13" y2="16" stroke="#9aa3ad" stroke-width="1.1"/></svg>Pegar<span class="kbd">Ctrl+V</span></button>
-        <button class="mi" data-action="delete"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" fill="none" stroke="#9aa3ad" stroke-width="1.4"/><path d="M4 6h16l-1.2 14.2A2 2 0 0 1 16.8 22H7.2a2 2 0 0 1-2-1.8z" fill="#e5484d"/><line x1="3" y1="6" x2="21" y2="6" stroke="#9aa3ad" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="10" x2="10" y2="17" stroke="#ffffff" stroke-width="1.1"/><line x1="14" y1="10" x2="14" y2="17" stroke="#ffffff" stroke-width="1.1"/></svg>Eliminar<span class="kbd">Supr</span></button>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="find"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar<span class="kbd">Ctrl+F</span></button>
-        <button class="mi" data-action="findNext"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar siguiente<span class="kbd">F3</span></button>
-        <button class="mi" data-action="findPrev"><svg class="mi-icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="#eef3fb" stroke="#2872c4" stroke-width="2"/><line x1="15.2" y1="15.2" x2="21" y2="21" stroke="#2872c4" stroke-width="2.4" stroke-linecap="round"/></svg>Buscar anterior<span class="kbd">Shift+F3</span></button>
-        <button class="mi" data-action="searchAll"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M2.6 8.3a1.2 1.2 0 0 1 1.2-1.3h4l1.4 1.6h7a1.2 1.2 0 0 1 1.2 1.2v6.2a1.2 1.2 0 0 1-1.2 1.2H3.8a1.2 1.2 0 0 1-1.2-1.2z" fill="#f0b429"/><circle cx="15.5" cy="14.5" r="5" fill="#eef3fb" stroke="#2872c4" stroke-width="1.8"/><line x1="19.2" y1="18.2" x2="22.5" y2="21.5" stroke="#2872c4" stroke-width="2" stroke-linecap="round"/></svg>Buscar en todas las notas…</button>
-        <button class="mi" data-action="replace"><svg class="mi-icon" viewBox="0 0 24 24"><path d="M3 11V9a4 4 0 0 1 4-4h14" fill="none" stroke="#2872c4" stroke-width="2" stroke-linecap="round"/><polyline points="17 1 21 5 17 9" fill="none" stroke="#2872c4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 13v2a4 4 0 0 1-4 4H3" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round"/><polyline points="7 23 3 19 7 15" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Reemplazar<span class="kbd">Ctrl+H</span></button>
-        <button class="mi" data-action="goto"><svg class="mi-icon" viewBox="0 0 24 24"><line x1="4" y1="12" x2="18" y2="12" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round"/><polyline points="13 6 19 12 13 18" fill="none" stroke="#2872c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Ir a<span class="kbd">Ctrl+G</span></button>
-        <div class="mi-sep"></div>
-        <button class="mi" data-action="selectAll"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="#2872c4" stroke-width="1.6" stroke-dasharray="3 2.4"/><circle cx="3.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="3.5" r="1.6" fill="#2872c4"/><circle cx="3.5" cy="20.5" r="1.6" fill="#2872c4"/><circle cx="20.5" cy="20.5" r="1.6" fill="#2872c4"/></svg>Seleccionar todo<span class="kbd">Ctrl+A</span></button>
-        <button class="mi" data-action="dateTime"><svg class="mi-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="1.5" fill="#ffffff" stroke="#c9ccd1" stroke-width="1"/><rect x="3" y="4" width="18" height="5" rx="1.5" fill="#e5484d"/><rect x="7" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="15.2" y="1.6" width="1.8" height="4.8" rx=".9" fill="#9aa3ad"/><rect x="6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="12" width="3.4" height="3" fill="#2872c4"/><rect x="14.6" y="12" width="3.4" height="3" fill="#cdddf3"/><rect x="6" y="16" width="3.4" height="3" fill="#cdddf3"/><rect x="10.3" y="16" width="3.4" height="3" fill="#cdddf3"/></svg>Fecha y hora<span class="kbd">F5</span></button>
-      </div>
-    </div>
+    
 
     <div class="menubar-sep"></div>
-    <div class="menu" data-menu="font" id="fontMenuWrap">
-      <button class="menu-btn" aria-label="Fuente"><svg viewBox="0 0 24 24" width="24" height="24"><text x="0" y="18" font-size="17" font-weight="700" fill="#2872c4" font-family="Georgia,serif">A</text><text x="13" y="19" font-size="12" font-weight="700" fill="#e5484d" font-family="Georgia,serif">a</text></svg><span class="menu-label">Fuente</span></button>
-      <div class="menu-dropdown dd-right" id="fontMenuDropdown"></div>
-    </div>
+    
 
     <div class="menubar-sep"></div>
 
@@ -745,7 +759,7 @@
   </footer>
 
   <footer class="appFooter">
-    Copyright &copy; <span id="copyYear"></span> by Editorium V9.7.
+    Copyright &copy; <span id="copyYear"></span> by Editorium V9.11.
   </footer>
 
   <input type="file" id="fileInput" accept=".txt,.md,.markdown,text/plain" hidden>
@@ -772,8 +786,8 @@
   const statusChars = document.getElementById('statusChars');
   const notesPanel = document.getElementById('notesPanel');
   const notesPanelList = document.getElementById('notesPanelList');
-  const recentSubmenu = document.getElementById('recentSubmenu');
-  const fontMenuDropdown = document.getElementById('fontMenuDropdown');
+  const recentSubmenu = document.createElement('div');
+  const fontMenuDropdown = document.createElement('div');
   const modalOverlay = document.getElementById('modalOverlay');
   const modalBox = document.getElementById('modalBox');
   const quickSaveBtn = document.getElementById('quickSaveBtn');
@@ -917,7 +931,7 @@
 
   function syncFolderStatus(){
     const folderButton = document.getElementById('tbFolder');
-    folderButton.classList.toggle('folder-required', supportsFSAccess && !saveDirHandle);
+
     folderButton.title = saveDirHandle
       ? 'Carpeta conectada: ' + saveDirHandle.name + '. Haz clic para cambiarla.'
       : 'Seleccionar carpeta de notas para comenzar';
@@ -976,7 +990,7 @@
         saveDirHandle = handle;
       } else {
         pendingDirHandle = handle;
-        document.getElementById('reconnectText').textContent =
+        reconnectBar.querySelector('#reconnectText').textContent =
           'La carpeta "' + handle.name + '" necesita confirmarse de nuevo en esta sesión.';
         reconnectBar.classList.add('show');
       }
@@ -1021,11 +1035,11 @@
   nav.querySelectorAll(':scope > .menubar-sep').forEach(el => el.remove());
   const sortBar = document.querySelector('.notes-sort');
   ['tbSortDate','tbSortAlpha'].forEach(id => sortBar.append(document.getElementById(id)));
-  const order = ['[data-menu="file"]','[data-menu="edit"]','[data-menu="font"]','#tbNewNote','#tbRename','#tbSearch','#tbFolder','#tbNotes','#quickSaveBtn'];
+  const order = ['#tbNewNote','#tbRename','#tbSearch','#tbFolder','#tbNotes','#quickSaveBtn'];
   order.forEach(selector => nav.append(nav.querySelector(selector)));
   document.querySelector('#tbNewNote .menu-label').textContent = 'Nueva nota';
-  document.querySelector('#tbFolder .menu-label').textContent = 'Seleccionar carpeta';
-  document.getElementById('tbFolder').setAttribute('aria-label', 'Seleccionar carpeta');
+  document.querySelector('#tbFolder .menu-label').textContent = 'Carpeta';
+  document.getElementById('tbFolder').setAttribute('aria-label', 'Carpeta');
   document.querySelector('#tbSortDate .menu-label').textContent = 'Recientes';
   document.querySelector('#tbSortAlpha .menu-label').textContent = 'A–Z';
   let notesSortMode = 'date';
@@ -2110,74 +2124,14 @@
 
   // ============ Menú: apertura / cierre ============
 
-  // Menús organizados por intención: archivo, edición, formato y vista.
-  function menuItem(label, handler){
-    const b=document.createElement('button');b.type='button';b.className='mi';b.textContent=label;
-    b.addEventListener('click',()=>{handler();closeAllMenus();});return b;
-  }
-  function addMenu(name,label){
-    const m=document.createElement('div');m.className='menu';m.dataset.menu=name;
-    m.innerHTML='<button type="button" class="menu-btn" aria-label="'+label+'"><span class="menu-label">'+label+'</span></button><div class="menu-dropdown"></div>';
-    nav.insertBefore(m,document.getElementById('tbNewNote'));return m.lastElementChild;
-  }
-  function renameAction(action,label){
-    const b=document.querySelector('[data-action="'+action+'"]');
-    Array.from(b.childNodes).filter(n=>n.nodeType===3).forEach(n=>n.remove());
-    const span=document.createElement('span');span.textContent=label;b.insertBefore(span,b.querySelector('.kbd'));return b;
-  }
-  renameAction('newTab','Nueva nota');renameAction('open','Abrir archivo…');
-  renameAction('delete','Eliminar selección');renameAction('find','Buscar en esta nota…');
-  renameAction('chooseFolder','Seleccionar carpeta de notas…');renameAction('goto','Ir a la línea…');
-  document.querySelector('[data-action="exitApp"]').remove();
-  const fileDD=document.querySelector('[data-menu="file"]>.menu-dropdown');
-  if(fileDD.lastElementChild.classList.contains('mi-sep'))fileDD.lastElementChild.remove();
-  const renameButton=document.getElementById('tbRename');renameButton.className='mi';
-  fileDD.insertBefore(renameButton,document.querySelector('[data-action="save"]'));
-  function exportNote(ext){
-    const t=activeTab();if(!t)return;
-    const url=URL.createObjectURL(new Blob([t.ta.value],{type:ext==='md'?'text/markdown;charset=utf-8':'text/plain;charset=utf-8'}));
-    const a=document.createElement('a');a.href=url;a.download=t.name.replace(/\.[^.]+$/,'')+'.'+ext;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }
-  fileDD.insertBefore(menuItem('Exportar Markdown (.md)…',()=>exportNote('md')),document.querySelector('[data-action="print"]'));
-  fileDD.insertBefore(menuItem('Exportar texto (.txt)…',()=>exportNote('txt')),document.querySelector('[data-action="print"]'));
-  const undo=document.querySelector('[data-action="undo"]');
-  undo.after(menuItem('Rehacer',()=>{const ta=activeTextarea();if(!ta||isLocked())return;ta.focus();document.execCommand('redo');refreshAll();}));
-  const formatDD=addMenu('format','Formato');
-  [['Negrita','bold'],['Cursiva','italic'],['Tachado','strike'],['Título principal','h1'],['Encabezado 2','h2'],['Encabezado 3','h3'],['Lista con viñetas','ul'],['Lista numerada','ol'],['Lista de tareas','task'],['Enlace','link'],['Cita','quote'],['Código en línea','code'],['Bloque de código','codeblock'],['Separador','hr']].forEach(([label,cmd])=>formatDD.append(menuItem(label,()=>{const t=activeTab();if(t&&!t.previewMode){t.ta.focus();applyMdFormat(t.ta,cmd);}})));
-  const viewDD=addMenu('view','Ver');
-  viewDD.append(menuItem('Vista previa Markdown',()=>togglePreview(activeTab())));
-  viewDD.append(menuItem('Modo concentración',()=>{document.body.classList.toggle('focus-mode');setNotesPanel(false);}));
-  const fontWrap=document.getElementById('fontMenuWrap');
-  fontWrap.className='submenuwrap';fontWrap.querySelector('.menu-btn').className='mi has-sub';
-  fontWrap.querySelector('.menu-label').textContent='Tipografía y tamaño ›';
-  fontMenuDropdown.className='menu-dropdown submenu';viewDD.append(fontWrap);
-  fontWrap.firstElementChild.addEventListener('click',buildFontMenu);
-  viewDD.append(menuItem('Mostrar / ocultar barra de estado',()=>{statusbar.hidden=!statusbar.hidden;}));
-  const helpDD=addMenu('help','Ayuda');
-  helpDD.append(menuItem('Atajos de teclado',()=>alertModal('Nueva nota: Ctrl/⌘ + N · Guardar: Ctrl/⌘ + S · Buscar: Ctrl/⌘ + F · Vista previa: Ctrl/⌘ + Shift + P · Negrita: Ctrl/⌘ + B · Cursiva: Ctrl/⌘ + I · Deshacer: Ctrl/⌘ + Z · Rehacer: Ctrl/⌘ + Shift + Z.',{title:'Atajos de teclado'})));
-  helpDD.append(menuItem('Guía Markdown',()=>alertModal('Usa # para títulos, **texto** para negrita, *texto* para cursiva, - para listas, - [ ] para tareas y [texto](https://ejemplo.com) para enlaces. Activa Ver → Vista previa Markdown para leer el resultado.',{title:'Guía Markdown'})));
-  helpDD.append(menuItem('Acerca de Editorium',()=>alertModal('Editorium 9.7 · Editor de notas local con Markdown.',{title:'Acerca de Editorium'})));
-  document.querySelector('#tbSearch .menu-label').textContent='Buscar notas';
-  const mac=/Mac|iPhone|iPad/.test(navigator.platform);
-  document.querySelectorAll('.kbd').forEach(el=>{if(mac)el.textContent=el.textContent.replace(/Ctrl/g,'⌘');});
   function updateMenuStates(){
-    const t=activeTab();
-    document.querySelectorAll('[data-action="save"],[data-action="saveAs"],[data-action="print"],#tbRename').forEach(b=>b.disabled=!t);
-    quickSaveBtn.disabled=!t;
-    formatDD.querySelectorAll('button').forEach(b=>b.disabled=!t||isLocked()||t.previewMode);
-    viewDD.firstElementChild.disabled=!t;
+    const noNote = !activeTab();
+    quickSaveBtn.disabled = noNote;
+    document.getElementById('tbRename').disabled = noNote;
   }
-  nav.addEventListener('click',updateMenuStates);updateMenuStates();
-  nav.addEventListener('keydown',e=>{
-    if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;
-    const m=e.target.closest('.menu');if(!m)return;
-    e.preventDefault();m.classList.add('open');syncMobileOverlay();
-    const choices=Array.from(m.querySelectorAll('.menu-dropdown button:not(:disabled)')).filter(b=>b.getClientRects().length&&!b.classList.contains('disabled'));
-    const i=choices.indexOf(document.activeElement);
-    const next=e.key==='Home'?0:e.key==='End'?choices.length-1:e.key==='ArrowUp'?(i-1+choices.length)%choices.length:(i+1)%choices.length;
-    choices[next]?.focus();
-  });
-
+  document.querySelector('#tbSearch .menu-label').textContent='Buscar notas';
+  reconnectBar.remove();
+  connectBar.remove();
   const menuEls = Array.from(document.querySelectorAll('.menubar > .menu'));
   const mobileBackdrop = document.getElementById('mobileBackdrop');
   function syncMobileOverlay(){
